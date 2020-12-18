@@ -1,3 +1,12 @@
+####################
+# Project specific #
+####################
+frey_rawface.mat
+
+############
+# Original #
+############
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
