@@ -4,7 +4,7 @@
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
-import math 
+import math
 
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -28,7 +28,7 @@ def q(x):
 ##
 ##	Inputs:		x 		Data point(-s)
 ##
-##	Return: 	Loss 	 	
+##	Return: 	Loss
 ##				RL		Reconstruction loss
 ##				KL		KL-divergence
 def loss(x):
@@ -40,7 +40,7 @@ def loss(x):
 	return loss, RL, KL
 
 ##
-##	Computes the reparameterization trick. 
+##	Computes the reparameterization trick.
 ##
 ##	This function is called when computing the variational posterior.
 ##
@@ -48,16 +48,18 @@ def repTrick():
 	pass
 
 ##
-##	Computes the prior, p(z). 
+##	Computes the prior, p(z).
 ##
 ##	Inputs:	z		Samples
 ##			type 	Type of prior to compute.
 ##					E.g. Gaussian, VampPrior
 ##
 def prior(z, pType='gaussian'):
-	
+
 	if pType == 'gaussian':
-		pass
+		res = -0.5 * tf.pow(z, 2)
+		res = tf.math.reduce_sum(res)
+		return res
 	elif pType == 'VampPrior':
 		pass
 	else:
@@ -75,9 +77,9 @@ def forwardPass():
 ##
 ##	Encodes data points by computing.
 ##
-##	Inputs:	x 	Datapoint(-s)
+##	Inputs:	x 					Datapoint(-s)
 ##
-##	Return: z	Encoded data points	
+##	Return: z = (mu, sigma)		Encoded data points
 ##
 def encoder(x):
 	pass
@@ -102,5 +104,3 @@ def main():
 	pass
 
 main()
-
-
