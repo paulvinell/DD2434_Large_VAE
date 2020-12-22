@@ -6,13 +6,13 @@ import numpy as np
 import math 
 
 ##
-##
+##	Computes p(x|z)
 ##
 def p(x):
 	pass
 
 ##
-##
+##	Computes the variational posterior, q(z | x)
 ##
 def q(x):
 	pass
@@ -20,13 +20,23 @@ def q(x):
 ##
 ##	Loss function
 ##
-def loss():
+##	Inputs:		x 		Data point(-s)
+##
+##	Return: 	Loss 	 	
+##				RL
+##				KL
+def loss(x):
+
+	loss = 0
 	RL = 0
 	KL = 0
-	pass
+
+	return loss, RL, KL
 
 ##
 ##	Computes the reparameterization trick. 
+##
+##	This function is called when computing the variational posterior.
 ##
 def reparTrick():
 	pass
@@ -48,8 +58,7 @@ def prior(z, pType='gaussian'):
 		pass
 
 ##
-##	Encodes data points by computing,
-##	q(z|x)
+##	Encodes data points by computing.
 ##
 ##	Inputs:	x 	Datapoint(-s)
 ##
@@ -59,12 +68,11 @@ def encoder(x):
 	pass
 
 ##
-##	Decodes data points by computing,
-##	p(x|z)
+##	Decodes data points by computing.
 ##
 ##	Inputs:	sample	A distribution sample
 ##
-##	Return 	x_hat	Decoded 
+##	Return 	x_hat	Decoded data points
 ##
 def decoder(sample):
 	pass
