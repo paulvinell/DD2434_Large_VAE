@@ -1,9 +1,15 @@
 #
 #	Variational Autoencoder
 #
-import tensorflow as ts
+import matplotlib.pyplot as plt
+import tensorflow as tf
 import numpy as np
 import math 
+
+
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+#			Helper Functions
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 ##
 ##	Computes p(x|z)
@@ -12,7 +18,7 @@ def p(x):
 	pass
 
 ##
-##	Computes the variational posterior, q(z | x)
+##	Computes the variational posterior, q(z| x)
 ##
 def q(x):
 	pass
@@ -23,8 +29,8 @@ def q(x):
 ##	Inputs:		x 		Data point(-s)
 ##
 ##	Return: 	Loss 	 	
-##				RL
-##				KL
+##				RL		Reconstruction loss
+##				KL		KL-divergence
 def loss(x):
 
 	loss = 0
@@ -38,7 +44,7 @@ def loss(x):
 ##
 ##	This function is called when computing the variational posterior.
 ##
-def reparTrick():
+def repTrick():
 	pass
 
 ##
@@ -56,6 +62,15 @@ def prior(z, pType='gaussian'):
 		pass
 	else:
 		pass
+
+
+def forwardPass():
+	pass
+
+
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+#			MODEL
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 ##
 ##	Encodes data points by computing.
@@ -78,5 +93,14 @@ def decoder(sample):
 	pass
 
 
-def main(dataset):
+def main():
+	"""
+	dataset = tf.keras.datasets.mnist
+	(train_x, train_y), (test_x, test_y) = dataset.load_data()
+	print(train_x.describe())
+	"""
 	pass
+
+main()
+
+
