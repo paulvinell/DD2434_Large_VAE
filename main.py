@@ -15,6 +15,7 @@
 ###################
 
 import argparse
+import requests
 parser = argparse.ArgumentParser()
 
 # Datasets
