@@ -65,6 +65,8 @@ elif args.frey:
     train_x = dataset[:num_training,:,:] # Training data
     test_x = dataset[num_training:,:,:] # Testing data
 
+import models.vae
+
 if args.gaussian:
     pass
 elif args.mog:
