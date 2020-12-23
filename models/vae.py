@@ -11,6 +11,8 @@ import numpy as np
 import scipy
 import math
 
+from models.model import Model
+
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 #			AUTOENCODER
@@ -121,11 +123,7 @@ def loss(x):
 ##			logvar
 ##
 ## Return:	reparameterization
-def repTrick(mu, logvar):
-    eps = tf.random.normal(tf.shape(mu), mean=0, stdev=1)
-	# Note: e^(logvar * 0.5) = sqrt(variance) = standard deviation
-    res = mu + tf.exp(logvar * 0.5) * eps
-    return res
+
 
 ##
 ##	Computes the log prior, p(z).
@@ -148,3 +146,74 @@ def prior(z, pType='gaussian'):
 
 def forwardPass():
 	pass
+
+
+class VAE(Model):
+
+	def __init__(self, args):
+		super(VAE, self).__init__(args)
+
+		prod_input_size = np.prod(self.args.input_size)
+
+		encoder = keras.Sequential([
+			keras.layers.Dense(
+				300, 
+				input_shape=(np.prod(inputSize)	,), 
+				activation='relu', 
+				name='EncLayer1'
+			),
+
+			keras.layers.Dense(
+				300, 
+				input_shape=(300,), 
+				activation='relu', 
+				name='EncLayer2'
+			),
+		])
+
+		#mean
+		self.q_mean = keras.Sequential(
+			keras.layers.Dense(self.z1_size, input_shape=(300,))
+		)
+		
+		#variance
+		self.q_var = keras.Sequential(
+			keras.layers.Dense(self.z1_size, input_shape=(300,), activation='tanh')
+		)
+
+		#Three layered decoder. Input is a sample z, and the decoder returns a (784,) vector.
+		#This process resemles p(x | z) in the graphical representation.
+		decoder = keras.Sequential([
+			keras.layers.Dense(
+				300, 
+				input_shape=(self.z1_size, ), 
+				activation='relu',
+				name='DecLayer1'
+			),
+
+			keras.layers.Dense(
+				300, 
+				input_shape=(300,), 
+				activation='relu', 
+				name='DecLayer2'
+			),
+		])
+
+		if self.args.input_type == "binary":
+			keras.layers.Dense(
+				prod_input_size,
+				input_shape=(300,), 
+				activation ='sigmoid', 
+				name='DecNonLinearLayer'
+			)
+		else: 
+			#TODO: Others type of input_type
+
+
+
+
+
+
+
+	
+
