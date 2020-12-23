@@ -62,25 +62,39 @@ decoder = keras.Sequential([
 ##
 ##	Variational posterior
 ##
+##	OBS: Assume that input_type is 'binary', to begin.
+##
 ##	Input:		x			data point
 ##
 ##	Retruns 	q_z_mean	mean
 ##				q_z_var		variance 
 ##
-def p(x):
-	pass
+def q(x):
+
+	x = encoder(x)
+	q_mean = q_mu(x)
+	q_logvar = q_sigma(x)
+
+	return q_mean, q_sigma
+
 
 ##
 ##	Generative posterior
+##	
+##	OBS: Assume that input_type is 'binary', to begin.
 ##
 ##	Input:		z			sample point
 ##
 ##	Retruns 	x_mean		mean, which could be interpreted
 ##							as the reconstructed image.
 ##				x_var		variance. This term is only computed for 
-##							non-binary dataset.
-def q(z):
-	pass
+##							non-binary input types.
+def p(z):
+
+	x_mean = decoder(z)
+	x_logvar = 0
+	return x_mean, x_logvar
+
 
 ##
 ##	Loss function
