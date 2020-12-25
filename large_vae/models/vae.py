@@ -133,7 +133,6 @@ class VAE(Model):
         """ 
         ##	Generative posterior
         ##
-        ##	OBS: Assume that input_type is 'binary', to begin.
         ##
         ##	Input:		z			sample point
         ##
@@ -150,7 +149,7 @@ class VAE(Model):
             x_logvar = 0.
 
         else:
-        #? For mom bimary data, the authors force the data to be between  0.+1./512.
+        #? For non bimary data, the authors force the data to be between  0.+1./512.
         #? and 1.-1./512.
             x_mean = nn.hardtanh(min_value = 0.+1./512, max_value = 1.-1./512.).hardtanh_function(x_mean)
             x_logvar = nn.p_logvar(z)
@@ -188,4 +187,25 @@ class VAE(Model):
         x_mean, x_logvar = self.p(z)
 
         return x_mean, x_logvar, z, z_mean, z_logvar
+
+
+    #? This function is used by the authors in the evaluation module but 
+    #? I don't understand why for now.
+    #? I code it just in case we need it
+    def generate_x(self, N=25):
+        
+        if self.args.prior == 'standard':
+            z_sample_rand = tf.Variable(tf.random.normal(
+                [N, self.args.z1_size]
+            ))
+
+        elif self.args.prior == 'vampprior':
+            #TODO: When we will implement VampPrior
+            pass
+
+        sample_rand = self.p(z_sample_rand)
+
+        return sample_rand
+
+
 
