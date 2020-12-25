@@ -181,7 +181,11 @@ class VAE(Model):
             pass
 
 
-    def forwardPass(self, ):
-        pass
+    def forwardPass(self, x):
 
+        z_mean, z_logvar = self.q(x)
+        z = self.repTrick(z_mean, z_logvar)
+        x_mean, x_logvar = self.p(z)
+
+        return x_mean, x_logvar, z, z_mean, z_logvar
 
