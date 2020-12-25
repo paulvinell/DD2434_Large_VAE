@@ -1,9 +1,8 @@
 import tensorflow as tf
 from tensorflow import keras
-from keras import Model as md
 
 
-class Model(md):
+class Model(keras.Model):
 
     def __init__(self,args):
 
