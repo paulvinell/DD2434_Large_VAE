@@ -208,4 +208,6 @@ class VAE(Model):
         return sample_rand
 
 
-
+def reconstruct_x(self,x):
+    x_mean, _, _, _, _ = self.forwardPass(x)
+    return x_mean
