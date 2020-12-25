@@ -28,154 +28,54 @@ from models.model import Model
 #
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-
-#Image Dimensions (28x28), which is the dimension
-#of one data point in the MINST.
-inputSize = [1, 28, 28]
-
-#Doule layered encoder. Takes one image with dimension (784,) as input, x, and returns a (300,) vector.
-#This process resemles q(z | x) in the graphical representation.
-encoder = keras.Sequential([
-	keras.layers.Dense(300, input_shape=(np.prod(inputSize)	,), activation='relu', name='EncLayer1'),
-	keras.layers.Dense(300, input_shape=(300,), activation='relu', name='EncLayer2'),
-])
-
-z_size = 40		# 40 stochastic hidden units for z - retrieved from the report p.5
-#mean
-q_mu = keras.Sequential(
-	keras.layers.Dense(z_size, input_shape=(300,))
-)
-#variance
-q_sigma = keras.Sequential(
-	keras.layers.Dense(z_size, input_shape=(300,), activation='tanh')
-)
-
-#Three layered decoder. Input is a sample z, and the decoder returns a (784,) vector.
-#This process resemles p(x | z) in the graphical representation.
-decoder = keras.Sequential([
-	keras.layers.Dense(300, input_shape=(40, ), activation='relu', name='DecLayer1'),
-	keras.layers.Dense(300, input_shape=(300,), activation='relu', name='DecLayer2'),
-	keras.layers.Dense(np.prod(inputSize), input_shape=(300,), activation ='sigmoid', name='DecNonLinearLayer')
-])
-
-
-
-##
-##	Variational posterior
-##
-##	OBS: Assume that input_type is 'binary', to begin.
-##
-##	Input:		x			data point
-##
-##	Retruns 	q_z_mean	mean
-##				q_z_var		variance
-##
-def q(x):
-
-	x = encoder(x)
-	q_mean = q_mu(x)
-	q_logvar = q_sigma(x)
-
-	return q_mean, q_sigma
-
-
-##
-##	Generative posterior
-##
-##	OBS: Assume that input_type is 'binary', to begin.
-##
-##	Input:		z			sample point
-##
-##	Retruns 	x_mean		mean, which could be interpreted
-##							as the reconstructed image.
-##				x_var		variance. This term is only computed for
-##							non-binary input types.
-def p(z):
-
-	x_mean = decoder(z)
-	x_logvar = 0
-	return x_mean, x_logvar
-
-
-##
-##	Loss function
-##
-##	Inputs:		x 		Data point(-s)
-##
-##	Return: 	Loss
-##				RL		Reconstruction loss
-##				KL		KL-divergence
-def loss(x):
-
-	loss = 0
-	RL = 0
-
-    log_p_z = prior(x, 'gaussian')
-    log_q_z = 0
-    KL = -(log_p_z - log_q_z)
-
-	return loss, RL, KL
-
-##
-##	Reparameterization trick.
-##
-## Inputs:	mu
-##			logvar
-##
-## Return:	reparameterization
-
-
-##
-##	Computes the log prior, p(z).
-##
-##	Inputs:	z		Samples
-##			type 	Type of prior to compute.
-##					E.g. Gaussian, VampPrior
-##
-def prior(z, pType='gaussian'):
-
-	if pType == 'gaussian':
-		res = -0.5 * tf.pow(z, 2)
-		res = tf.math.reduce_sum(res)
-		return res
-	elif pType == 'VampPrior':
-		pass
-	else:
-		pass
-
-
-def forwardPass():
-	pass
-
-
 class VAE(Model):
 
 	def __init__(self, args):
 		super(VAE, self).__init__(args)
 
-		prod_input_size = np.prod(self.args.input_size)
+		if args.gaussian:
+		    pass
+		elif args.mog:
+		    pass
+		elif args.vamp:
+		    pass
 
-		encoder = keras.Sequential([
+		if args.vae:
+		    pass
+		elif args.hvae:
+		    pass
+
+		if args.mnist:
+		    self.inputSize = [1, 28, 28]
+		elif args.frey:
+		    self.inputSize = [1, 20, 28]
+
+		prod_input_size = np.prod(self.inputSize)
+
+		self.encoder = keras.Sequential([
 			keras.layers.Dense(
-				300, 
-				input_shape=(np.prod(inputSize)	,), 
-				activation='relu', 
+				300,
+				input_shape=(np.prod(self.inputSize)	,),
+				activation='relu',
 				name='EncLayer1'
 			),
 
 			keras.layers.Dense(
-				300, 
-				input_shape=(300,), 
-				activation='relu', 
+				300,
+				input_shape=(300,),
+				activation='relu',
 				name='EncLayer2'
 			),
 		])
+
+		# TODO: fix this
+		self.z1_size = 1
 
 		#mean
 		self.q_mean = keras.Sequential(
 			keras.layers.Dense(self.z1_size, input_shape=(300,))
 		)
-		
+
 		#variance
 		self.q_var = keras.Sequential(
 			keras.layers.Dense(self.z1_size, input_shape=(300,), activation='tanh')
@@ -183,37 +83,111 @@ class VAE(Model):
 
 		#Three layered decoder. Input is a sample z, and the decoder returns a (784,) vector.
 		#This process resemles p(x | z) in the graphical representation.
-		decoder = keras.Sequential([
+		self.decoder = keras.Sequential([
 			keras.layers.Dense(
-				300, 
-				input_shape=(self.z1_size, ), 
+				300,
+				input_shape=(self.z1_size, ),
 				activation='relu',
 				name='DecLayer1'
 			),
 
 			keras.layers.Dense(
-				300, 
-				input_shape=(300,), 
-				activation='relu', 
+				300,
+				input_shape=(300,),
+				activation='relu',
 				name='DecLayer2'
 			),
 		])
 
-		if self.args.input_type == "binary":
-			keras.layers.Dense(
-				prod_input_size,
-				input_shape=(300,), 
-				activation ='sigmoid', 
-				name='DecNonLinearLayer'
-			)
-		else: 
-			#TODO: Others type of input_type
+		# if self.args.input_type == "binary":
+		# 	keras.layers.Dense(
+		# 		prod_input_size,
+		# 		input_shape=(300,),
+		# 		activation ='sigmoid',
+		# 		name='DecNonLinearLayer'
+		# 	)
+		# else:
+		# 	#TODO: Others type of input_type
+		# 	pass
+
+	##
+	##	Variational posterior
+	##
+	##	OBS: Assume that input_type is 'binary', to begin.
+	##
+	##	Input:		x			data point
+	##
+	##	Retruns 	q_z_mean	mean
+	##				q_z_var		variance
+	##
+	def q(self, x):
+
+		x = self.encoder(x)
+		q_mean = self.q_mean(x)
+		q_logvar = self.q_var(x)
+
+		return q_mean, q_sigma
 
 
+	##
+	##	Generative posterior
+	##
+	##	OBS: Assume that input_type is 'binary', to begin.
+	##
+	##	Input:		z			sample point
+	##
+	##	Retruns 	x_mean		mean, which could be interpreted
+	##							as the reconstructed image.
+	##				x_var		variance. This term is only computed for
+	##							non-binary input types.
+	def p(self, z):
+
+		x_mean = self.decoder(z)
+		x_logvar = 0
+		return x_mean, x_logvar
 
 
+	##
+	##	Loss function
+	##
+	##	Inputs:		x 		Data point(-s)
+	##
+	##	Return: 	Loss
+	##				RL		Reconstruction loss
+	##				KL		KL-divergence
+	def loss(self, x):
+		loss = 0
+		RL = 0
+
+		log_p_z = self.prior(x, 'gaussian')
+		log_q_z = 0
+		KL = -(log_p_z - log_q_z)
+
+		return loss, RL, KL
 
 
+	##
+	##	Computes the log prior, p(z).
+	##
+	##	Inputs:	z		Samples
+	##			type 	Type of prior to compute.
+	##					E.g. Gaussian, VampPrior
+	##
+	def prior(self, z, pType='gaussian'):
 
-	
+		if pType == 'gaussian':
+			# Derived from the logarithm of the pdf of the normal distribution.
+			# Some constants have been dropped.
+			res = -0.5 * tf.pow(z, 2)
+			res = tf.math.reduce_sum(res)
+			return res
+		elif pType == 'VampPrior':
+			# TODO: stuff
+			q_mean, q_sigma = self.q(z)
+			# TODO: other stuff
+		else:
+			pass
 
+
+	def forwardPass(self):
+		pass

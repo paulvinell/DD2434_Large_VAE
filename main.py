@@ -31,6 +31,13 @@ parser.add_argument("--vamp", help='Prior: VAMP', action='store_true')
 parser.add_argument("--vae", help='Model: Variational Auto-Encoder', action='store_true')
 parser.add_argument("--hvae", help='Model: Hierarchical Variational Auto-Encoder', action='store_true')
 
+# VAMP
+parser.add_argument("--pseudoinput_count", type=int, default=500, help='VAMP: Number of pseudoinputs')
+
+# Training
+parser.add_argument("--epochs", type=int, default=100, help='Training: Number of epochs')
+parser.add_argument("--mini_batch_size", type=int, default=16, help='Training: Mini batch size')
+
 args = parser.parse_args() # Contains binary values for each flag
 
 ############
@@ -55,6 +62,8 @@ import matplotlib.pyplot as plt
 
 print("Using Tensorflow version {}".format(tf.__version__))
 
+from utils.dataset import preprocess
+
 if args.mnist:
     dataset = tf.keras.datasets.mnist
     (train_x, train_y), (test_x, test_y) = dataset.load_data() # I don't think we need the labels
@@ -66,16 +75,18 @@ elif args.frey:
     train_x = dataset[:num_training,:,:] # Training data
     test_x = dataset[num_training:,:,:] # Testing data
 
-import models.vae
+train_x = preprocess(train_x)
+test_x = preprocess(test_x)
 
-if args.gaussian:
-    pass
-elif args.mog:
-    pass
-elif args.vamp:
-    pass
+train_dataset = tf.data.Dataset.from_tensor_slices(train_x).shuffle(train_x.shape[0]).batch(args.mini_batch_size)
+test_dataset = tf.data.Dataset.from_tensor_slices(test_x).shuffle(test_x.shape[0]).batch(args.mini_batch_size)
 
-if args.vae:
-    pass
-elif args.hvae:
-    pass
+from models.vae import VAE
+
+vae = VAE(args)
+
+input("Press Enter to begin...")
+for epoch in range(1, 1 + args.epochs):
+    print("Epoch {}".format(epoch))
+    for x in train_dataset:
+        vae.train_step(x)
