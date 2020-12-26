@@ -205,7 +205,7 @@ class VAE(Model):
         return x_mean, x_logvar, z, z_mean, z_logvar
 
 
-    def loss(self, x, beta=1.):
+    def loss(self, x, beta=1., average=False):
         """
         # ##
         # ##    Loss Function.
@@ -249,7 +249,42 @@ class VAE(Model):
 
         loss = KL*beta - RE
 
-        return loss, RE, KL
+        if average:
+            return tf.reduce_mean(loss), tf.reduce_mean(RE), tf.reduce_mean(KL)
+        else:
+            return loss, RE, KL
+
+
+    def lowerBound(self, X, MB = 100):
+        """
+        # ##
+        # ##    Computes the lower bound, which is part of the evaluation
+        # ##    process.
+        # ##
+        # ##    Inputs:     X       All data points
+        # ##                MB      Minibatches
+        # ##
+        # ##    Returns:    LB      Lower Bound value
+        # ##
+        """
+
+        LB = 0.
+        RE_tot = 0.
+        KL_tot = 0.
+
+        I = int(math.ceil(X.size[0] / MB))
+
+        for i in range(I):
+
+            x = X[i * MB: (i+1)*MB].view(-1,np.prod(self.args.input_size))
+
+            loss, RE, KL = self.loss(x, average=True)
+
+            LB += loss.cpu().data
+            RE_tot += RE.cpu().data
+            KL_tot += KL.cpu().data
+
+        return LB/I
 
 
     #? This function is used by the authors in the evaluation module but
@@ -280,15 +315,15 @@ class VAE(Model):
         return sample_rand
 
 
-def reconstruct_x(self,x):
-    """
-    # ##
-    # ##    Reconstructs an image, by passing it through the network.
-    # ##
-    # ##    Inputs:     X               Data points
-    # ##
-    # ##    Returns:    x_mean          Reconstructed data point, e.g. an image.
-    # ##
-    """
-    x_mean, _, _, _, _ = self.forwardPass(x)
-    return x_mean
+    def reconstruct_x(self,x):
+        """
+        # ##
+        # ##    Reconstructs an image, by passing it through the network.
+        # ##
+        # ##    Inputs:     X               Data points
+        # ##
+        # ##    Returns:    x_mean          Reconstructed data point, e.g. an image.
+        # ##
+        """
+        x_mean, _, _, _, _ = self.forwardPass(x)
+        return x_mean
