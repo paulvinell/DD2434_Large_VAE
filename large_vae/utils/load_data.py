@@ -6,6 +6,14 @@ import os
 from urllib.request import urlopen, URLError, HTTPError
 from scipy.io import loadmat
 
+import tensorflow as tf
+
+
+def preprocess(data):
+    data = data.reshape((data.shape[0], data.shape[1], data.shape[2], 1)) / 255.0
+    return data.astype('float32')
+
+
 def fetch_file(url):
     try:
         f = urlopen(url)
@@ -35,4 +43,40 @@ def load_frey_faces():
     ff = loadmat(data_filename, squeeze_me=True, struct_as_record=False)
     ff = ff["ff"].T.reshape((-1, img_rows, img_cols))
 
-    return ff
+    num_data_points = ff.shape[0]
+    num_training = int(num_data_points * 0.9)
+    train_x = ff[:num_training,:,:] # Training data
+    test_x = ff[num_training:,:,:] # Testing data
+
+    return train_x, test_x
+
+
+def load_mninst_dataset():
+    dataset = tf.keras.datasets.mnist
+    ((train_x, train_y), (test_x, test_y)) = dataset.load_data() # I don't think we need the labels
+
+    return train_x, test_x
+
+
+def load_experiment_dataset(dataset_name):
+    """Load the dataset chosen to perform the experiment
+    """
+    if dataset_name == 'mninst':
+        train_x, test_x = load_mninst_dataset()
+    elif dataset_name == 'frey':
+        train_x, test_x = load_frey_faces()
+
+    train_x = preprocess(train_x)
+    test_x = preprocess(test_x)
+
+    train_dataset = tf.data.Dataset.from_tensor_slices(train_x).shuffle(train_x.shape[0]).batch(args.batch_size)
+    test_dataset = tf.data.Dataset.from_tensor_slices(test_x).shuffle(test_x.shape[0]).batch(args.batch_size)
+
+    return train_dataset, test_dataset
+    
+
+
+
+
+
+    
