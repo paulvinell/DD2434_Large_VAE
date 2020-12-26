@@ -37,15 +37,15 @@ class VAE(Model):
         # Encoder
         self.encoder = keras.Sequential([
             keras.layers.Dense(
-                300, 
-                input_shape=(prod_input_size,), 
-                activation='relu', 
+                300,
+                input_shape=(prod_input_size,),
+                activation='relu',
                 name='EncLayer1'
             ),
             keras.layers.Dense(
-                300, 
-                input_shape=(300,), 
-                activation='relu', 
+                300,
+                input_shape=(300,),
+                activation='relu',
                 name='EncLayer2'
             ),
         ])
@@ -53,8 +53,8 @@ class VAE(Model):
         # Latent variables
         #mean
         self.q_mean = keras.layers.Dense(
-                    self.args.z1_size, 
-                    input_shape=(300,), 
+                    self.args.z1_size,
+                    input_shape=(300,),
                     name = 'latent_mean'
                 )
 
@@ -62,9 +62,9 @@ class VAE(Model):
         #? The researchers used an activation function to force the output
         #? of this layer to be between -6 and 2
         self.q_logvar = keras.layers.Dense(
-                self.args.z1_size, 
-                input_shape=(300,), 
-                activation=nn.hardtanh(min_value=-6., max_value=2.).hardtanh_function, 
+                self.args.z1_size,
+                input_shape=(300,),
+                activation=nn.hardtanh(min_value=-6., max_value=2.).hardtanh_function,
                 name = 'latent_logvariance'
             )
 
@@ -72,23 +72,23 @@ class VAE(Model):
         #This process resembles p(x | z) in the graphical representation.
         self.decoder = keras.Sequential([
             keras.layers.Dense(
-                300, 
-                input_shape=(self.args.z1_size, ), 
+                300,
+                input_shape=(self.args.z1_size, ),
                 activation='relu',
                 name='DecLayer1'
             ),
             keras.layers.Dense(
-                300, 
-                input_shape=(300,), 
-                activation='relu', 
+                300,
+                input_shape=(300,),
+                activation='relu',
                 name='DecLayer2'
             ),
         ])
-        
+
         self.p_mean = keras.layers.Dense(
                 prod_input_size,
-                input_shape=(300,), 
-                activation ='sigmoid', 
+                input_shape=(300,),
+                activation ='sigmoid',
                 name='dec_output_mean'
         )
 
@@ -99,17 +99,17 @@ class VAE(Model):
                 activation = nn.hardtanh(min_value = -4.5, max_value = 0).hardtanh_function,
                 name = 'dec_output_logvar'
             )
-        
+
         # weight initialization
         #! Consider changing the weight initialization if necessary
-        
+
         #TODO: add pseudoinputs if Vamprior is used
-        if self.args.prior == 'Vamprior': 
+        if self.args.prior == 'Vamprior':
             pass
-    
+
 
     def q(self, x):
-        """ 
+        """
         ##
         ##	Variational posterior
         ##
@@ -127,10 +127,10 @@ class VAE(Model):
 
         return q_mean, q_logvar
 
-    
+
 
     def p(self, z):
-        """ 
+        """
         ##	Generative posterior
         ##
         ##
@@ -158,13 +158,13 @@ class VAE(Model):
 
 
     def prior(self, z):
-        """ 
+        """
         # ##
         # ##	Computes the log prior, p(z).
         # ##
         # ##	Inputs:	z		Samples
-        # ##	
-        # ##    The type of prior to compute is in 
+        # ##
+        # ##    The type of prior to compute is in
         # ##    the attribute self.args.prior(given when running the experiment)
         # ##    It can be Gaussian, VampPrior, ...
         # ##
@@ -183,7 +183,21 @@ class VAE(Model):
 
 
     def forwardPass(self, x):
-
+        """
+        # ##
+        # ##    Uses data point and traverse one time through the network.
+        # ##
+        # ##    Inputs:     x            Data points, such as images.
+        # ##
+        # ##    Returns:    x_mean       Mean values of the reconstructed data point.
+        # ##                x_logvar     Variance of the reconstructed data point.
+        # ##                             Observe. This is only availabe for non-binary
+        # ##                             input types.
+        # ##                z            Sample
+        # ##                z_mean       Mean of encoded data points.
+        # ##                z_logvar     Variance of encoded data points.
+        # ##
+        """
         z_mean, z_logvar = self.q(x)
         z = self.repTrick(z_mean, z_logvar)
         x_mean, x_logvar = self.p(z)
@@ -191,11 +205,67 @@ class VAE(Model):
         return x_mean, x_logvar, z, z_mean, z_logvar
 
 
-    #? This function is used by the authors in the evaluation module but 
+    def loss(self, x, beta=1.):
+        """
+        # ##
+        # ##    Loss Function.
+        # ##
+        # ##    Inputs:     x          Data points, such as images.
+        # ##                beta       Cost minimizing parameter
+        # ##
+        # ##
+        # ##    Outputs:    loss       Difference between true and predicted value
+        # ##                RE         Log-Likelihood
+        # ##                KL         Regularizing value
+        # ##
+        """
+        #One round through the network.
+        x_hat, x_var, z_sample, q_mean, q_var = self.forwardPass(x)
+
+        ##
+        ##  Log-likelihood. Computes P(z|x).
+        ##
+        #-----------------------------------------
+        #TODO: This section requires the LL-part
+        #      to compute the likelihood.
+        #-----------------------------------------
+        if self.args.input_type == 'binary':
+            RE = bernoulli(x, x_hat, dim=1)
+        elif self.args.input_type == 'gray' or self.args.input_type == 'continuous':
+            RE = 0  #OBS. This is a temporary setting.
+            #RE = loglikelihood(X) # p(z|x)
+        else:
+            raise Exception('Data type is not supported.')
+        #-----------------------------------------
+        #       END
+        #-----------------------------------------
+
+        ##
+        ##  Regularizer. Computes KL(q(z|x) || p(z)).
+        ##
+        q_z = normal(z_sample, q_mean, q_var, dim=1) #Our learned distribution, q(z|x).
+        prior = self.prior(x)   #Prior, p(z)
+        KL = -(q_z - prior)
+
+        loss = KL*beta - RE
+
+        return loss, RE, KL
+
+
+    #? This function is used by the authors in the evaluation module but
     #? I don't understand why for now.
     #? I code it just in case we need it
     def generate_x(self, N=25):
-        
+        """
+        # ##
+        # ##    Generates some z-samples from a distribution. Samples will be
+        # ##    passed through the decoder to evaluate the model.
+        # ##
+        # ##    Inputs:     N               Number of samples to generate
+        # ##
+        # ##    Returns:    sample_rand     Samples
+        # ##
+        """
         if self.args.prior == 'standard':
             z_sample_rand = tf.Variable(tf.random.normal(
                 [N, self.args.z1_size]
@@ -211,5 +281,14 @@ class VAE(Model):
 
 
 def reconstruct_x(self,x):
+    """
+    # ##
+    # ##    Reconstructs an image, by passing it through the network.
+    # ##
+    # ##    Inputs:     X               Data points
+    # ##
+    # ##    Returns:    x_mean          Reconstructed data point, e.g. an image.
+    # ##
+    """
     x_mean, _, _, _, _ = self.forwardPass(x)
     return x_mean
