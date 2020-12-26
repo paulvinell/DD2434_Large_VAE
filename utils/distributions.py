@@ -22,12 +22,12 @@ def normal(x, mean, variance, average=False, dim=None):
 		return tf.math.reduce_sum(log_N, axis = dim)
 
 ##
-##	Log Bernoulli 
+##	Log Bernoulli
 ##
 def bernoulli(x, x_hat, average=False, dim=None):
-	
+
 	probabilities = tf.clip_by_value(
-    x_hat, clip_value_min = minEps, clip_value_max= maxEps, 
+    x_hat, clip_value_min = minEps, clip_value_max= maxEps,
 	)
 
 	bern = x * tf.log(probabilities) + (1. -x) * tf.log(1. - probabilities)
@@ -36,5 +36,3 @@ def bernoulli(x, x_hat, average=False, dim=None):
 		return tf.math.reduce_mean(bern, dim)
 	else:
 		return tf.math.reduce_sum(bern, axis=dim)
-
-
