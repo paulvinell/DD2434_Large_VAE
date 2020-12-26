@@ -92,7 +92,7 @@ def parse_arguments():
 
     #+- Model +-#
     parser.add_argument("--model", type=str, default='vae', choices=['vae', 'hvae'], help="type of model to use")
-    parser.add_argument("--prior", type=str, default='gaussian', choices=['gaussian', 'vamp', 'mog'], help = "prior to use" )
+    parser.add_argument("--prior", type=str, default='gaussian', choices=['gaussian', 'vampprior', 'mog'], help = "prior to use" )
     #TODO: add pseudoinputs
     parser.add_argument("--z1_size", type=pos_num, default=40, help = "first latent layer size")
     parser.add_argument("--z2_size", type=pos_num, default=40, help = "second latent layer size")
