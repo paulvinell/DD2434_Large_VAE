@@ -174,8 +174,10 @@ class VAE(Model):
             res = -0.5 * tf.pow(z, 2)
             res = tf.math.reduce_sum(res)
             return res
-        elif self.args.prior == 'VampPrior':
-            pass
+        elif self.args.prior == 'vampprior':
+            # TODO: stuff
+			q_mean, q_sigma = self.q(z)
+			# TODO: other stuff
         else:
             pass
 
