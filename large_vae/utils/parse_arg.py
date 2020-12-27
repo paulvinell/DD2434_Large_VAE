@@ -65,12 +65,12 @@ class interval:
             int_ = int(x)
             if int_ < self.mini or int_ > self.maxi:
                 raise argparse.ArgumentTypeError(
-                    "Should be a number between {} and {}.".format(self.mini,self.maxi)
+                    "should be a number between {} and {}.".format(self.mini,self.maxi)
                 )
             return int_
         except ValueError:
             raise argparse.ArgumentTypeError(
-                "Should be a number between {} and {}.".format(self.mini,self.maxi))
+                "should be a number between {} and {}.".format(self.mini,self.maxi))
 
 # Parsing all possible arguments
 # They are all described in the comments above
