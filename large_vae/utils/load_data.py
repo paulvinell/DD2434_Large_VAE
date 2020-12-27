@@ -58,12 +58,12 @@ def load_mninst_dataset():
     return train_x, test_x
 
 
-def load_experiment_dataset(dataset_name):
+def load_experiment_dataset(args):
     """Load the dataset chosen to perform the experiment
     """
-    if dataset_name == 'mninst':
+    if args.dataset == 'mnist':
         train_x, test_x = load_mninst_dataset()
-    elif dataset_name == 'frey':
+    elif args.dataset == 'frey':
         train_x, test_x = load_frey_faces()
 
     train_x = preprocess(train_x)
@@ -73,10 +73,3 @@ def load_experiment_dataset(dataset_name):
     test_dataset = tf.data.Dataset.from_tensor_slices(test_x).shuffle(test_x.shape[0]).batch(args.batch_size)
 
     return train_dataset, test_dataset
-    
-
-
-
-
-
-    

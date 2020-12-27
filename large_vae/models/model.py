@@ -20,11 +20,11 @@ class Model(keras.Model):
     ##			logvar
     ##
     ## Return:	reparameterization
-    def repTrick(mu, logvar):
+    def repTrick(self, mu, logvar):
         """ Reparameterization trick
         """
 
-        eps = tf.random.normal(tf.shape(mu), mean=0, stdev=1)
+        eps = tf.random.normal(tf.shape(mu), mean=0, stddev=1)
         # Note: e^(logvar * 0.5) = sqrt(variance) = standard deviation
         res = mu + tf.exp(logvar * 0.5) * eps
 

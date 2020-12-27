@@ -36,6 +36,7 @@ class VAE(Model):
 
         # Encoder
         self.encoder = keras.Sequential([
+            keras.layers.Flatten(), # Converts (width, height, 1) -> (width*height*1)
             keras.layers.Dense(
                 300,
                 input_shape=(prod_input_size,),
@@ -92,19 +93,18 @@ class VAE(Model):
                 name='dec_output_mean'
         )
 
-        if self.args.input_type == 'gray' or self.args.input_type == 'continuous':
-            self.p_logvar = keras.layers.Dense(
-                prod_input_size,
-                input_shape=(300,),
-                activation = nn.hardtanh(min_value = -4.5, max_value = 0).hardtanh_function,
-                name = 'dec_output_logvar'
-            )
+        self.p_logvar = keras.layers.Dense(
+            prod_input_size,
+            input_shape=(300,),
+            activation = nn.hardtanh(min_value = -4.5, max_value = 0.0).hardtanh_function,
+            name = 'dec_output_logvar'
+        )
 
         # weight initialization
         #! Consider changing the weight initialization if necessary
 
         #TODO: add pseudoinputs if Vamprior is used
-        if self.args.prior == 'Vamprior':
+        if self.args.prior == 'vamprior':
             pass
 
 
@@ -138,21 +138,16 @@ class VAE(Model):
         ##
         ##	Retruns 	x_mean		mean, which could be interpreted
         ##							as the reconstructed image.
-        ##				x_var		variance. This term is only computed for
-        ##							non-binary input types.
+        ##				x_var		variance.
         """
 
         z = self.decoder(z)
         x_mean = self.p_mean(z)
 
-        if self.args.input_type == 'binary':
-            x_logvar = 0.
-
-        else:
         #? For non bimary data, the authors force the data to be between  0.+1./512.
         #? and 1.-1./512.
-            x_mean = nn.hardtanh(min_value = 0.+1./512, max_value = 1.-1./512.).hardtanh_function(x_mean)
-            x_logvar = nn.p_logvar(z)
+        x_mean = nn.hardtanh(min_value = 0.+1./512, max_value = 1.-1./512.).hardtanh_function(x_mean)
+        x_logvar = self.p_logvar(z)
 
         return x_mean, x_logvar
 
@@ -176,8 +171,8 @@ class VAE(Model):
             return res
         elif self.args.prior == 'vampprior':
             # TODO: stuff
-			q_mean, q_sigma = self.q(z)
-			# TODO: other stuff
+            q_mean, q_sigma = self.q(z)
+            # TODO: other stuff
         else:
             pass
 
@@ -191,8 +186,6 @@ class VAE(Model):
         # ##
         # ##    Returns:    x_mean       Mean values of the reconstructed data point.
         # ##                x_logvar     Variance of the reconstructed data point.
-        # ##                             Observe. This is only availabe for non-binary
-        # ##                             input types.
         # ##                z            Sample
         # ##                z_mean       Mean of encoded data points.
         # ##                z_logvar     Variance of encoded data points.
@@ -229,13 +222,9 @@ class VAE(Model):
         #TODO: This section requires the LL-part
         #      to compute the likelihood.
         #-----------------------------------------
-        if self.args.input_type == 'binary':
-            RE = bernoulli(x, x_hat, dim=1)
-        elif self.args.input_type == 'gray' or self.args.input_type == 'continuous':
-            RE = 0  #OBS. This is a temporary setting.
-            #RE = loglikelihood(X) # p(z|x)
-        else:
-            raise Exception('Data type is not supported.')
+
+        RE = self.loglikelihood(x) # p(z|x)
+
         #-----------------------------------------
         #       END
         #-----------------------------------------

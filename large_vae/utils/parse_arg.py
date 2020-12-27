@@ -20,10 +20,10 @@ import argparse
 
 
 #+- Model +-#
-# model: 
-#   - type of model to use 
+# model:
+#   - type of model to use
 #   - possible values = 'vae', 'hvae'
-# prior: 
+# prior:
 #   - type of prior to use
 #   - possible values = 'vamp', 'mog', 'gaussian'
 # pseudoinputs:
@@ -42,13 +42,6 @@ import argparse
 # dataset_name:
 #   - name of the dataset
 #   - possible values = 'minst', 'frey'
-# input_size:
-#   - dimensions of the images input
-#   - possible values = list of dimension [x, y, z] 
-# input_type:
-#   - Type of input
-#   - possible values = 'binary', 'gray', 'continuous' (I don't know what 'gray' is)
-#TODO: Maybe add dynamic binarization ?
 ########################################################################
 
 # utility class to use in argparse
@@ -59,7 +52,7 @@ class interval:
     def __init__(self, mini=0, maxi=float('inf')):
         self.mini = mini
         self.maxi = maxi
-        
+
     def check(self, x):
         try:
             int_ = int(x)
@@ -79,7 +72,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Run a VAE experiment on a dataset"
     )
-    
+
     pos_num = interval().check
     below_one = interval(maxi = 1).check
 
@@ -93,13 +86,18 @@ def parse_arguments():
     #+- Model +-#
     parser.add_argument("--model", type=str, default='vae', choices=['vae', 'hvae'], help="type of model to use")
     parser.add_argument("--prior", type=str, default='gaussian', choices=['gaussian', 'vampprior', 'mog'], help = "prior to use" )
-    #TODO: add pseudoinputs
+
     parser.add_argument("--z1_size", type=pos_num, default=40, help = "first latent layer size")
     parser.add_argument("--z2_size", type=pos_num, default=40, help = "second latent layer size")
-    parser.add_argument("--dataset", type=str, choices=['mninst', 'frey'], help = "dataset name", required = True)
-    parser.add_argument("--input_size", type=pos_num, nargs=3, help = "dimension of image input", required = True)
-    parser.add_argument("--input_type", type=str, choices=['binary', 'gray', 'continuous'], help = "type of input", required = True)
+    parser.add_argument("--dataset", type=str, default='mnist', choices=['mninst', 'frey'], help = "dataset name")
+    parser.add_argument("--pseudoinput_count", type=int, default=500, help='number of pseudoinputs for the VampPrior')
 
     args = parser.parse_args()
+
+    args_vars = vars(args)
+    if args.dataset == 'mnist':
+        args_vars['input_size'] = (28, 28, 1)
+    elif args.dataset == 'frey':
+        args_vars['input_size'] = (20, 28, 1)
 
     return args
