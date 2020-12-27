@@ -1,9 +1,6 @@
 import tensorflow as tf
 from tensorflow import keras
 
-# Optimizer
-optimizer = tf.keras.optimizers.Adam(1e-4)
-
 class Model(keras.Model):
 
     def __init__(self, args):
@@ -32,12 +29,3 @@ class Model(keras.Model):
         res = mu + tf.exp(logvar * 0.5) * eps
 
         return res
-
-
-    """ Performs a training step for a set of samples """
-    @tf.function
-    def train_step(self, x):
-        with tf.GradientTape() as tape:
-            loss = self.loss(x)
-        gradients = tape.gradient(loss, self.trainable_variables)
-        optimizer.apply_gradients(zip(gradients, self.trainable_variables))
