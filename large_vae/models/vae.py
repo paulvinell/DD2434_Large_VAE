@@ -255,6 +255,37 @@ class VAE(Model):
             return loss, RE, KL
 
 
+    def loglikelihood(self, X, sample_size=5000, batch_size=100):
+        ''' Estimate the marginal log likelihood using importance sampling
+        @param sample_size: the number of sample points for importance sampling
+        @param batch_size: the size of the batch for calculating the loss
+
+        '''
+        if sample_size <= batch_size:
+            rounds = 1
+        else:
+            rounds = sample_size / batch_size
+            sample_size = batch_size
+
+            x_data_point = X.expand_dims(0)
+
+        losses = []
+        for r in range(0, int(rounds)):
+            # Repeat for all data points
+            x = x_data_point.expand(sample_size, x_data_point.size(1))
+
+            loss_for_data_point, _, _ = self.calculate_loss(x)
+
+            losses.append(-loss_for_data_point)
+
+        # Calculate max using logsumexp
+        losses = np.asarray(losses)
+        losses = np.reshape(losses, (losses.shape[0] * losses.shape[1], 1))
+        likelihood_x = tf.math.reduce_logsumexp(losses)
+        # Calculate log mean
+        return likelihood_x - np.log(len(losses))
+
+
     def lowerBound(self, X, MB = 100):
         """
         # ##
