@@ -80,12 +80,13 @@ def parse_arguments():
     parser.add_argument("--epochs", type=pos_num,default=100, help="number of epochs to use during the training")
     parser.add_argument("--batch_size", type=pos_num,default=16, help="batch size to use for training")
     parser.add_argument("--lr", type=below_one, default=0.0005,help="learning rate of the learning process" )
+    parser.add_argument("--evaluation", type=below_one, default=0.1,help="percentage of training data to be used for evaluation" )
     parser.add_argument("--early_stopping", type=pos_num,default=50, help="number of epochs for early stopping")
     parser.add_argument("--warmup", type=pos_num,default=100, help="number of epochs for warmup")
 
     #+- Model +-#
     parser.add_argument("--model", type=str, default='vae', choices=['vae', 'hvae'], help="type of model to use")
-    parser.add_argument("--prior", type=str, default='gaussian', choices=['gaussian', 'vampprior', 'mog'], help = "prior to use" )
+    parser.add_argument("--prior", type=str, default='gaussian', choices=['gaussian', 'vampprior', 'mog'], help = "prior to use")
 
     parser.add_argument("--z1_size", type=pos_num, default=40, help = "first latent layer size")
     parser.add_argument("--z2_size", type=pos_num, default=40, help = "second latent layer size")

@@ -5,6 +5,7 @@
 import os
 from urllib.request import urlopen, URLError, HTTPError
 from scipy.io import loadmat
+from sklearn.model_selection import train_test_split
 
 import tensorflow as tf
 
@@ -66,10 +67,14 @@ def load_experiment_dataset(args):
     elif args.dataset == 'frey':
         train_x, test_x = load_frey_faces()
 
+    train_x, val_x = train_test_split(train_x, test_size=args.evaluation)
+
     train_x = preprocess(train_x)
+    val_x = preprocess(val_x)
     test_x = preprocess(test_x)
 
     train_dataset = tf.data.Dataset.from_tensor_slices(train_x).shuffle(train_x.shape[0]).batch(args.batch_size)
+    val_dataset = tf.data.Dataset.from_tensor_slices(val_x).shuffle(val_x.shape[0]).batch(args.batch_size)
     test_dataset = tf.data.Dataset.from_tensor_slices(test_x).shuffle(test_x.shape[0]).batch(args.batch_size)
 
-    return train_dataset, test_dataset
+    return train_dataset, val_dataset, test_dataset

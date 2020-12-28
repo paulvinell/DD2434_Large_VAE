@@ -16,28 +16,28 @@ def plot_history(train_history, eval_history, time_history):
     pass
 
 
-def run_experiment(model, train_dataset, eval_dataset, args):
+def run_experiment(model, train_dataset, val_dataset, eval_dataset, args):
 
-    """ Run the complete experiment. 
-        That is, for each epoch, train the dataset and  
-        evaluate it. 
+    """ Run the complete experiment.
+        That is, for each epoch, train the dataset and
+        evaluate it.
 
         The model is ready when the loss function has increased
-        over two successive epochs or when we reach the max number 
+        over two successive epochs or when we reach the max number
         of epochs passed as argument in CLI.
 
-    """ 
+    """
 
     adam_optimizer = optimizer(args.lr)
 
-    # History of the learning and evaluation 
+    # History of the learning and evaluation
     # processes trough epochs
     train_history = {'loss':[], 'RE':[], 'KL':[]}
     eval_history = {'loss':[], 'RE':[], 'KL':[]}
 
     # Time history
     time_history = list()
-    
+
     current_epoch = 0
     best_loss = 1e10
 
@@ -47,14 +47,14 @@ def run_experiment(model, train_dataset, eval_dataset, args):
 
         epoch_start_time = time.time()
         train_loss_epoch, train_RE_epoch, train_KL_epoch = one_pass(
-            model, 
-            train_dataset, 
-            mode = 'train', 
+            model,
+            train_dataset,
+            mode = 'train',
             optimizer = adam_optimizer
         )
 
         eval_loss_epoch, eval_RE_epoch, eval_KL_epoch = one_pass(
-            model, 
+            model,
             eval_dataset,
         )
 
@@ -93,11 +93,7 @@ def run_experiment(model, train_dataset, eval_dataset, args):
 
 
     # Out the while loop
-    # At this point we have the best model 
+    # At this point we have the best model
     # We evaluate it now
     # TODO: We need a training, evaluation and test dataset we only have the training and test ones. Can be changed in the load dataset module
     # evaluate_model(model, test_dataset, args)
-
-
-
-
