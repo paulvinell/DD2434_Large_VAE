@@ -171,6 +171,7 @@ class VAE(Model):
         if self.args.prior == 'gaussian':
             res = -0.5 * tf.pow(z, 2)
             res = tf.math.reduce_sum(res)
+            # print("----------------> res: ", res)
             return res
         elif self.args.prior == 'vampprior':
             # TODO: stuff
@@ -195,7 +196,10 @@ class VAE(Model):
         # ##
         """
         z_mean, z_logvar = self.q(x)
+        # print('----------> z_mean:', z_mean)
+        # print('----------> z_logvar:', z_logvar)
         z = self.repTrick(z_mean, z_logvar)
+        # print('----------> z:', z)
         x_mean, x_logvar = self.p(z)
 
         return x_mean, x_logvar, z, z_mean, z_logvar
@@ -225,10 +229,12 @@ class VAE(Model):
 
         log_prior = tf.math.log(self.prior(z)) # log p(z)
         log_q_z = log_normal(z, z_mean, z_logvar, dim=1) # Our learned variational distribution, log q(z|x).
+        # print('------------> log_prior:', log_prior)
+        # print('------------> log_q_z:', log_q_z)
         KL = log_q_z - log_prior
-        print("##### KL:", KL)
-        print("##### beta:", beta)
-        print("##### RE:", RE)
+        # print("##### KL:", KL)
+        # print("##### beta:", beta)
+        # print("##### RE:", RE)
         loss = KL * beta - RE
 
         if average:
