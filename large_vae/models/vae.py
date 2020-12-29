@@ -10,6 +10,7 @@ import tensorflow.nn as nn
 import numpy as np
 
 from utils import nn
+from utils.distributions import discretized_log_logistic, log_normal
 from models.model import Model
 
 
@@ -208,35 +209,23 @@ class VAE(Model):
         # ##
         # ##
         # ##    Outputs:    loss       Difference between true and predicted value
-        # ##                RE         Log-Likelihood
+        # ##                RE         Reconstruction error
         # ##                KL         Regularizing value
         # ##
         """
-        #One round through the network.
-        x_hat, x_var, z_sample, q_mean, q_var = self.forwardPass(x)
+        #One pass through the network.
+        x_mean, x_logvar, z, z_mean, z_logvar = self.forwardPass(x)
 
         ##
-        ##  Log-likelihood. Computes P(z|x).
+        ##  Reconstruction error
         ##
-        #-----------------------------------------
-        #TODO: This section requires the LL-part
-        #      to compute the likelihood.
-        #-----------------------------------------
+        RE = discretized_log_logistic(x, x_mean, x_logvar) # p(x|z)
 
-        RE = self.loglikelihood(x) # p(z|x)
+        log_prior = tf.math.log(self.prior(z)) # log p(z)
+        log_q_z = log_normal(z, z_mean, z_logvar, dim=1) # Our learned variational distribution, log q(z|x).
+        KL = log_q_z - log_prior
 
-        #-----------------------------------------
-        #       END
-        #-----------------------------------------
-
-        ##
-        ##  Regularizer. Computes KL(q(z|x) || p(z)).
-        ##
-        q_z = normal(z_sample, q_mean, q_var, dim=1) #Our learned distribution, q(z|x).
-        prior = self.prior(x)   #Prior, p(z)
-        KL = -(q_z - prior)
-
-        loss = KL*beta - RE
+        loss = KL * beta - RE
 
         if average:
             return tf.reduce_mean(loss), tf.reduce_mean(RE), tf.reduce_mean(KL)
@@ -250,29 +239,30 @@ class VAE(Model):
         @param batch_size: the size of the batch for calculating the loss
 
         '''
-        if sample_size <= batch_size:
-            rounds = 1
-        else:
-            rounds = sample_size / batch_size
-            sample_size = batch_size
+        # if sample_size <= batch_size:
+        #     rounds = 1
+        # else:
+        #     rounds = sample_size / batch_size
+        #     sample_size = batch_size
 
-            x_data_point = X.expand_dims(0)
+        #     x_data_point = X.expand_dims(0)
 
-        losses = []
-        for r in range(0, int(rounds)):
-            # Repeat for all data points
-            x = x_data_point.expand(sample_size, x_data_point.size(1))
+        # losses = []
+        # for r in range(0, int(rounds)):
+        #     # Repeat for all data points
+        #     x = x_data_point.expand(sample_size, x_data_point.size(1))
 
-            loss_for_data_point, _, _ = self.calculate_loss(x)
+        #     loss_for_data_point, _, _ = self.calculate_loss(x)
 
-            losses.append(-loss_for_data_point)
+        #     losses.append(-loss_for_data_point)
 
-        # Calculate max using logsumexp
-        losses = np.asarray(losses)
-        losses = np.reshape(losses, (losses.shape[0] * losses.shape[1], 1))
-        likelihood_x = tf.math.reduce_logsumexp(losses)
-        # Calculate log mean
-        return likelihood_x - np.log(len(losses))
+        # # Calculate max using logsumexp
+        # losses = np.asarray(losses)
+        # losses = np.reshape(losses, (losses.shape[0] * losses.shape[1], 1))
+        # likelihood_x = tf.math.reduce_logsumexp(losses)
+        # # Calculate log mean
+        # return likelihood_x - np.log(len(losses))
+        pass
 
 
     def lowerBound(self, X, MB = 100):
