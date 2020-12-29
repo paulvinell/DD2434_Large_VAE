@@ -292,7 +292,7 @@ class VAE(Model):
         RE_tot = 0.
         KL_tot = 0.
 
-        I = int(math.ceil(tf.size(X)] / MB))
+        I = int(math.ceil(tf.size(X) / MB))
 
         for i in range(I):
 
