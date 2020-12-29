@@ -226,7 +226,9 @@ class VAE(Model):
         log_prior = tf.math.log(self.prior(z)) # log p(z)
         log_q_z = log_normal(z, z_mean, z_logvar, dim=1) # Our learned variational distribution, log q(z|x).
         KL = log_q_z - log_prior
-
+        print("##### KL:", KL)
+        print("##### beta:", beta)
+        print("##### RE:", RE)
         loss = KL * beta - RE
 
         if average:
