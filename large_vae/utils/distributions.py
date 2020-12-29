@@ -31,7 +31,7 @@ def discretized_log_logistic(x, mean, logscale):
 	print("#####printing mean:", mean)
 	print("#####printing scale:", scale)
 	print("#####printing x:", x)
-	x = tf.reshape(x, [x.shape[0], x.shape[1]*x.shape[2]*x.shape[3]])
+	# x = tf.reshape(x, [x.shape[0], x.shape[1]*x.shape[2]*x.shape[3]])
 	print("#####printing reshaped x:", x)
 	x = (tf.floor(x * bins) / bins - mean) / scale
 	cdf_with_x = tf.sigmoid(x + 1. / (bins * scale))

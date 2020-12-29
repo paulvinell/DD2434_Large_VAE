@@ -37,7 +37,7 @@ class VAE(Model):
 
         # Encoder
         self.encoder = keras.Sequential([
-            keras.layers.Flatten(), # Converts (width, height, 1) -> (width*height*1)
+            # keras.layers.Flatten(), # Converts (width, height, 1) -> (width*height*1)
             keras.layers.Dense(
                 300,
                 input_shape=(prod_input_size,),
@@ -124,8 +124,8 @@ class VAE(Model):
 
         x = self.encoder(x)
         q_mean = self.q_mean(x)
-        print("############ printing x: ", x)
-        print("############ tf.shape(x): ", tf.shape(x))
+        # print("############ printing x: ", x)
+        # print("############ tf.shape(x): ", tf.shape(x))
         q_logvar = self.q_logvar(x)
 
         return q_mean, q_logvar
