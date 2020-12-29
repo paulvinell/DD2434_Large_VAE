@@ -11,10 +11,10 @@ from experiment.runexperiment import run_experiment
 args = parse_arguments()
 
 # Load experiment dataset
-train_dataset, val_dataset, test_dataset = load_experiment_dataset(args)
+train_dataset, eval_dataset, test_dataset = load_experiment_dataset(args)
 
 # Initialize the model
 vae = load_model(args)
 
 # Run the experiment
-run_experiment(vae, train_dataset, val_dataset, test_dataset, args)
+run_experiment(vae, train_dataset, eval_dataset, test_dataset, args)

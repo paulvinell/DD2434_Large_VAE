@@ -74,7 +74,7 @@ def load_experiment_dataset(args):
     test_x = preprocess(test_x)
 
     train_dataset = tf.data.Dataset.from_tensor_slices(train_x).shuffle(train_x.shape[0]).batch(args.batch_size)
-    val_dataset = tf.data.Dataset.from_tensor_slices(val_x).shuffle(val_x.shape[0]).batch(args.batch_size)
+    eval_dataset = tf.data.Dataset.from_tensor_slices(val_x).shuffle(val_x.shape[0]).batch(args.batch_size)
     test_dataset = tf.data.Dataset.from_tensor_slices(test_x).shuffle(test_x.shape[0]).batch(args.batch_size)
 
-    return train_dataset, val_dataset, test_dataset
+    return train_dataset, eval_dataset, test_dataset
