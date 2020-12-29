@@ -8,7 +8,7 @@ import tensorflow.keras as keras
 # HardTanh activation
 class hardtanh(keras.Model):
     def __init__(self, min_value = -1.0, max_value = 1.0):
-        super(hardtanh, self).__init__()
+        super(hardtanh, self)
         self.min_value = min_value
         self.max_value = max_value
 
@@ -25,6 +25,6 @@ class hardtanh(keras.Model):
 
         def apply_on_line(tensor_line):
             return tf.map_fn(hardtanh_, tensor_line)
-        
+
 
         return tf.map_fn(apply_on_line, tensor)
