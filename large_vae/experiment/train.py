@@ -2,12 +2,16 @@ import tensorflow as tf
 from tensorflow import keras
 
 @tf.function
-def train_step(model, optimizer, loss):
+def train_step(model, optimizer, x):
     """ Performs a training step for a set of samples """
 
     with tf.GradientTape() as tape:
-        gradients = tape.gradient(loss, model.trainable_variables)
-        optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+        loss = model.loss(x)
+
+    gradients = tape.gradient(loss, model.trainable_variables)
+    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+
+    return loss
 
 
 # Here we train the model on the train dataset
@@ -22,11 +26,11 @@ def one_pass(model, dataset, mode = 'evaluate', optimizer = None):
     KL = 0
 
     for batch_data in dataset:
-        loss_stamp, RE_stamp, KL_stamp = model.loss(batch_data)
-        
         if mode == 'train':
-            train_step(model, optimizer, loss_stamp)
-            
+            loss_stamp, RE_stamp, KL_stamp = train_step(model, optimizer, batch_data)
+        elif mode == 'evaluate':
+            loss_stamp, RE_stamp, KL_stamp = model.loss(batch_data)
+
         RE += RE_stamp
         loss += loss_stamp
         KL += KL_stamp
