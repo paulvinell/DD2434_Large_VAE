@@ -42,6 +42,9 @@ import argparse
 # dataset_name:
 #   - name of the dataset
 #   - possible values = 'minst', 'frey'
+# evaluation
+#   - percentage of training data to be used for evaluation
+#   - possible values = at most 1
 ########################################################################
 
 # utility class to use in argparse

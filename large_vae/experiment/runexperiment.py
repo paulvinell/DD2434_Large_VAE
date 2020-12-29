@@ -16,7 +16,7 @@ def plot_history(train_history, eval_history, time_history):
     pass
 
 
-def run_experiment(model, train_dataset, val_dataset, eval_dataset, args):
+def run_experiment(model, train_dataset, eval_dataset, test_dataset, args):
 
     """ Run the complete experiment.
         That is, for each epoch, train the dataset and
@@ -95,5 +95,5 @@ def run_experiment(model, train_dataset, val_dataset, eval_dataset, args):
     # Out the while loop
     # At this point we have the best model
     # We evaluate it now
-    # TODO: We need a training, evaluation and test dataset we only have the training and test ones. Can be changed in the load dataset module
-    # evaluate_model(model, test_dataset, args)
+    # TODO: Code that function
+    evaluate_model(model, test_dataset, args)
