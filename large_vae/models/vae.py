@@ -124,6 +124,8 @@ class VAE(Model):
 
         x = self.encoder(x)
         q_mean = self.q_mean(x)
+        print("############ printing x: ", x)
+        print("############ tf.shape(x): ", tf.shape(x))
         q_logvar = self.q_logvar(x)
 
         return q_mean, q_logvar
@@ -337,3 +339,4 @@ class VAE(Model):
         """
         x_mean, _, _, _, _ = self.forwardPass(x)
         return x_mean
+
