@@ -292,11 +292,12 @@ class VAE(Model):
         RE_tot = 0.
         KL_tot = 0.
 
-        I = int(math.ceil(X.size[0] / MB))
+        I = int(math.ceil(tf.size(X)] / MB))
 
         for i in range(I):
 
-            x = X[i * MB: (i+1)*MB].view(-1,np.prod(self.args.input_size))
+            x = X[i * MB: (i+1)*MB]                             #####
+            x = tf.reshape(x, (-1,np.prod(self.input_size)))    #####
 
             loss, RE, KL = self.loss(x, average=True)
 
@@ -347,4 +348,3 @@ class VAE(Model):
         """
         x_mean, _, _, _, _ = self.forwardPass(x)
         return x_mean
-
