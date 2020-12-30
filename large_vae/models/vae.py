@@ -227,7 +227,7 @@ class VAE(Model):
         ##
         RE = discretized_log_logistic(x, x_mean, x_logvar) # p(x|z)
 
-        log_prior = tf.math.log(self.prior(z)) # log p(z)
+        log_prior = self.prior(z) # log p(z)
         log_q_z = log_normal(z, z_mean, z_logvar, dim=1) # Our learned variational distribution, log q(z|x).
         # print('------------> log_prior:', log_prior)
         # print('------------> log_q_z:', log_q_z)
