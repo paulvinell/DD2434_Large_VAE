@@ -12,6 +12,7 @@ import numpy as np
 from utils import nn
 from utils.distributions import discretized_log_logistic, log_normal
 from models.model import Model
+from scipy.special import logsumexp
 
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -243,36 +244,54 @@ class VAE(Model):
             return loss, RE, KL
 
 
-    def loglikelihood(self, X, sample_size=5000, batch_size=100):
-        ''' Estimate the marginal log likelihood using importance sampling
-        @param sample_size: the number of sample points for importance sampling
-        @param batch_size: the size of the batch for calculating the loss
+    def loglikelihood(self, x, sample_size=5000, batch_size=100):
+        """
+        # ##
+        # ##    Estimate the marginal log likelihood
+        # ##
+        # ##    Inputs:     sample_size: the number of sample points for importance sampling
+        # ##                batch_size: the size of the batch for calculating the loss
+        # ##
+        # ##    Returns:    loglikelihood
+        # ##
+        """
+        test_size = x.shape[0] # get number of rows in test data
 
-        '''
-        # if sample_size <= batch_size:
-        #     rounds = 1
-        # else:
-        #     rounds = sample_size / batch_size
-        #     sample_size = batch_size
+        likelihood_test = []
 
-        #     x_data_point = X.expand_dims(0)
+        if sample_size <= batch_size:
+            rounds = 1
+        else:
+            rounds = sample_size / batch_size
+            sample_size = batch_size
 
-        # losses = []
-        # for r in range(0, int(rounds)):
-        #     # Repeat for all data points
-        #     x = x_data_point.expand(sample_size, x_data_point.size(1))
+        for i in range(test_size):
+            x_data_point = tf.expand_dims(x[0],0) # wrap single row in brackets
 
-        #     loss_for_data_point, _, _ = self.calculate_loss(x)
+            losses = []
+            for r in range(0, int(rounds)):
+                # Copy data point to get # of rows == sample_size
+                tf.broadcast_to(x_data_point, [sample_size, x_data_point.shape[1]])
 
-        #     losses.append(-loss_for_data_point)
+                loss_for_data_point, _, _ = self.loss(x) # self.loss should not average before returning
 
-        # # Calculate max using logsumexp
-        # losses = np.asarray(losses)
-        # losses = np.reshape(losses, (losses.shape[0] * losses.shape[1], 1))
-        # likelihood_x = tf.math.reduce_logsumexp(losses)
-        # # Calculate log mean
-        # return likelihood_x - np.log(len(losses))
-        pass
+                losses.append(-loss_for_data_point)
+
+            # Calculate max
+            losses = np.asarray(losses)
+            #  Reshape into the form
+            #  array([[1],
+            #   [2],
+            #   [3],
+            #   ...,
+            #   [sample_size]])
+            losses = np.reshape(losses, (losses.shape[0] * losses.shape[1], 1))
+            likelihood_x = logsumexp(losses)
+            likelihood_test.append(likelihood_x - np.log(len(losses)))
+
+        likelihood_test = np.array(likelihood_test)
+        
+        return -np.mean(likelihood_test)
 
 
     def lowerBound(self, X, MB = 100):
