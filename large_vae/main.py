@@ -7,14 +7,18 @@ from utils.load_data import load_experiment_dataset
 from utils.load_model import load_model
 from experiment.runexperiment import run_experiment
 
-# Parse arguments
-args = parse_arguments()
+def main():
+    # Parse arguments
+    args = parse_arguments()
 
-# Load experiment dataset
-train_dataset, eval_dataset, test_dataset = load_experiment_dataset(args)
+    # Load experiment dataset
+    train_dataset, eval_dataset, test_dataset = load_experiment_dataset(args)
 
-# Initialize the model
-vae = load_model(args)
+    # Initialize the model
+    vae = load_model(args)
 
-# Run the experiment
-run_experiment(vae, train_dataset, eval_dataset, test_dataset, args)
+    # Run the experiment
+    run_experiment(vae, train_dataset, eval_dataset, test_dataset, args)
+
+if __name__ == "__main__":
+    main()

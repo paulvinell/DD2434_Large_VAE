@@ -1,0 +1,8 @@
+trainingInput: # This is a fast, basic, yet cheap setup
+  scaleTier: BASIC_GPU # 1 NVIDIA K80
+  pythonVersion: "3.7"
+  runtimeVersion: "2.3" # tensorflow 2.3
+
+# No more up-to-date combination is available
+# other than Python 3.7 + Tensorflow 2.3.
+# (See https://cloud.google.com/ai-platform/training/docs/runtime-version-list)
