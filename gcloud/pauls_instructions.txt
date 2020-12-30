@@ -1,0 +1,13 @@
+1. Setup Cloud SDK on your computer.
+2. On the website (Google Cloud Console) under API dashboard, click on "Enable APIs and services". Enable: Billing, Compute Engine, AI Platform Training & Prediction, Cloud functions, Cloud storage.
+3. On the website, under Storage, create your own storage. Name it "large_vae" (you can name it something else, but then you have to change $STORAGE_NAME in gcloud_staging.sh).
+4. Run the command "bash gcloud_staging.sh"
+5. In the Cloud console you can see your Jobs through AI platform->Jobs
+
+
+I have created the basis for this gcloud setup from the following video:
+https://www.youtube.com/watch?v=VxnHf-FfWKY
+(but a lot is different)
+
+Noteworthy details:
+1. It costs to store data on google cloud. However, it is very cheap and the payment model is data usage per unit of time. If you have a server for storage but you don't store anything on it, it will not cost you.
