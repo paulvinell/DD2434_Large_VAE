@@ -1,3 +1,7 @@
+import os
+import json
+import errno
+
 from models.vae import VAE
 
 def load_model(args):
@@ -7,3 +11,45 @@ def load_model(args):
     elif args.model == 'hvae':
         pass
     return model
+
+
+def create_experiment_folder(args, cwf):
+    """ Creates the folder where to save the results of the experiment  
+        The name of the folder is generated automatically from the 
+        parameters of the experiment (args).
+
+        It also saves the experiment parameters as a json file in the 
+        resulting folder.
+
+    """
+
+    # The absolute path to the project folder (*/.../large_vae/)
+    project_folder = os.path.dirname(cwf)
+
+    # Generating the folder absolute path
+    dict_args = vars(args).copy()
+    expe_folder_abs_path = os.path.join(
+        project_folder,
+        "results",
+        dict_args.pop('model'),
+        dict_args.pop('prior'),
+        dict_args.pop('dataset'),
+        str(dict_args).replace('\'', '').replace('{', '').replace('}', '').replace(': ', '-'),
+        ""
+    )
+    
+    # Creating the folder 
+    if not os.path.exists(expe_folder_abs_path):
+        try:
+            os.makedirs(expe_folder_abs_path)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise 
+
+    # Save the json file containing the parameters in the folder
+    param_path = os.path.join(expe_folder_abs_path, 'parameters.json')
+    with open(param_path, 'w') as f:
+        json.dump(vars(args), f, indent=4)
+        f.close()
+
+    return expe_folder_abs_path
