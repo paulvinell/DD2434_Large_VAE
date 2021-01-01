@@ -11,7 +11,7 @@ def main():
     # Parse arguments
     args = parse_arguments()
 
-    # Load experiment dataset
+    # Load unbatched experiment dataset
     train_dataset, eval_dataset, test_dataset = load_experiment_dataset(args)
 
     # Initialize the model
