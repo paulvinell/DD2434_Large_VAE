@@ -4,6 +4,8 @@ import tensorflow as tf
 
 from experiment.train import one_pass
 from experiment.evaluate import evaluate_model
+from utils.visual import plot_history
+from utils.load_data import batch_data
 
 def optimizer(lr):
     # Optimizer
@@ -11,12 +13,7 @@ def optimizer(lr):
 
     return optimizer
 
-# TODO: Plot the history
-def plot_history(train_history, eval_history, time_history):
-    pass
-
-
-def run_experiment(model, train_dataset, eval_dataset, test_dataset, args):
+def run_experiment(model, train_x, val_x, test_x, dir, args):
 
     """ Run the complete experiment.
         That is, for each epoch, train the dataset and
@@ -27,6 +24,9 @@ def run_experiment(model, train_dataset, eval_dataset, test_dataset, args):
         of epochs passed as argument in CLI.
 
     """
+    train_dataset = batch_data(train_x, args)   # tf.data.Dataset.from_tensor_slices(train_x).batch(args.batch_size)
+    eval_dataset =  batch_data(val_x, args)     # tf.data.Dataset.from_tensor_slices(val_x).batch(args.batch_size)
+    test_dataset =  batch_data(test_x, args)    # tf.data.Dataset.from_tensor_slices(test_x).batch(args.batch_size)
 
     adam_optimizer = optimizer(args.lr)
 
@@ -41,9 +41,10 @@ def run_experiment(model, train_dataset, eval_dataset, test_dataset, args):
     current_epoch = 0
     best_loss = 1e10
 
-    while (current_epoch <= args.epochs):
+    while (current_epoch < args.epochs):
 
         current_epoch += 1
+        print("----- EPOCH {}/{} -----".format(current_epoch,args.epochs))
 
         epoch_start_time = time.time()
         train_loss_epoch, train_RE_epoch, train_KL_epoch = one_pass(
@@ -88,12 +89,32 @@ def run_experiment(model, train_dataset, eval_dataset, test_dataset, args):
             eval_loss_epoch, eval_RE_epoch, eval_KL_epoch,
         ))
 
-    # TODO: It may be interesting to plot the process history. Complete this function
-    plot_history(train_history, eval_history, time_history)
+    plot_history(train_history, eval_history, time_history, dir)
 
 
     # Out the while loop
     # At this point we have the best model
-    # We evaluate it now
-    # TODO: Code that function
-    evaluate_model(model, test_dataset, args)
+    # We test it now on the test dataset
+    test_loss, test_KL, test_RE = one_pass(model, test_dataset)
+    log_likelihood_test, log_likelihood_train, elbo_test, elbo_train = evaluate_model(model, train_x, test_x, dir, args)
+
+    # Print the results of the test
+    with open(dir + 'final results.txt') as f:
+        print('FINAL EVALUATION ON TEST SET\n'
+              'LogL (TEST): {:.2f}\n'
+              'LogL (TRAIN): {:.2f}\n'
+              'ELBO (TEST): {:.2f}\n'
+              'ELBO (TRAIN): {:.2f}\n'
+              'Loss: {:.2f}\n'
+              'RE: {:.2f}\n'
+              'KL: {:.2f}'.format(
+            log_likelihood_test,
+            log_likelihood_train,
+            elbo_test,
+            elbo_train,
+            test_loss,
+            test_RE,
+            test_KL
+        ), file=f)
+        f.close()
+
