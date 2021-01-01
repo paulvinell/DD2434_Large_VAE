@@ -4,16 +4,16 @@
 #	Authors: David, Majd, Paul, Fredrick
 #
 
-import tensorflow as tf
+from scipy.special import logsumexp
 import tensorflow.keras as keras
 import tensorflow.nn as nn
+import tensorflow as tf
 import numpy as np
+import math
 
 from utils import nn
 from utils.distributions import discretized_log_logistic, log_normal
 from models.model import Model
-from scipy.special import logsumexp
-
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 #			AUTOENCODER
@@ -106,7 +106,7 @@ class VAE(Model):
         #! Consider changing the weight initialization if necessary
 
         #TODO: add pseudoinputs if Vamprior is used
-        if self.args.prior == 'vamprior':
+        if self.args.prior == 'vampprior':
             pass
 
 
@@ -311,18 +311,18 @@ class VAE(Model):
         RE_tot = 0.
         KL_tot = 0.
 
-        I = int(math.ceil(tf.size(X) / MB))
+        I = int(math.ceil(X.shape[0]/ MB))
 
         for i in range(I):
 
             x = X[i * MB: (i+1)*MB]                             #####
-            x = tf.reshape(x, (-1,np.prod(self.input_size)))    #####
+            x = tf.reshape(x, (-1,np.prod(self.args.input_size)))    #####
 
             loss, RE, KL = self.loss(x, average=True)
 
-            LB += loss.cpu().data
-            RE_tot += RE.cpu().data
-            KL_tot += KL.cpu().data
+            LB += loss.cpu().numpy()
+            RE_tot += RE.cpu().numpy()
+            KL_tot += KL.cpu().numpy()
 
         return LB/I
 
@@ -330,7 +330,7 @@ class VAE(Model):
     #? This function is used by the authors in the evaluation module but
     #? I don't understand why for now.
     #? I code it just in case we need it
-    def generate_x(self, N=25):
+    def generate_x(self, N=16):
         """
         # ##
         # ##    Generates some z-samples from a distribution. Samples will be
@@ -341,7 +341,7 @@ class VAE(Model):
         # ##    Returns:    sample_rand     Samples
         # ##
         """
-        if self.args.prior == 'standard':
+        if self.args.prior == 'gaussian':
             z_sample_rand = tf.Variable(tf.random.normal(
                 [N, self.args.z1_size]
             ))
