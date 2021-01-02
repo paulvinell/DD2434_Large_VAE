@@ -1,0 +1,8 @@
+FINAL EVALUATION ON TEST SET
+LogL (TEST): 0.00
+LogL (TRAIN): 0.00
+ELBO (TEST): nan
+ELBO (TRAIN): nan
+Loss: nan
+RE: nan
+KL: nan
