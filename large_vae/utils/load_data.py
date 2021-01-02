@@ -3,8 +3,10 @@
 # Differences: I changed from Python 2 -> Python 3
 
 import os
+
 from urllib.request import urlopen, URLError, HTTPError
 from scipy.io import loadmat
+import numpy as np
 from sklearn.model_selection import train_test_split
 
 import tensorflow as tf
@@ -13,6 +15,10 @@ import tensorflow as tf
 def preprocess(data):
     # data = data.reshape((data.shape[0], data.shape[1], data.shape[2], 1)) / 255.0
     data = data.reshape((data.shape[0], data.shape[1] * data.shape[2])) / 255.0
+    # #======== Test ===========#
+    # data = data[0:50]
+    # # ========================# 
+    np.random.shuffle(data)
     return data.astype('float32')
 
 
@@ -74,8 +80,7 @@ def load_experiment_dataset(args):
     val_x = preprocess(val_x)
     test_x = preprocess(test_x)
 
-    train_dataset = tf.data.Dataset.from_tensor_slices(train_x).shuffle(train_x.shape[0]).batch(args.batch_size)
-    eval_dataset = tf.data.Dataset.from_tensor_slices(val_x).shuffle(val_x.shape[0]).batch(args.batch_size)
-    test_dataset = tf.data.Dataset.from_tensor_slices(test_x).shuffle(test_x.shape[0]).batch(args.batch_size)
+    return train_x, val_x, test_x
 
-    return train_dataset, eval_dataset, test_dataset
+def batch_data(data, args):
+    return tf.data.Dataset.from_tensor_slices(data).batch(args.batch_size)
