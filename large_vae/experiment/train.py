@@ -38,15 +38,6 @@ def one_pass(model, dataset, mode = 'evaluate', optimizer = None):
         loss += loss_stamp
         KL += KL_stamp
 
-        # print("Loss")
-        # print(loss_stamp)
-        # print("RE")
-        # print(RE_stamp)
-        # print("KL")
-        # print(KL_stamp)
-        
-        # print("Loss {:.5g} (RE {:.5g}, KL {:.5g})".format(tf.math.reduce_mean(loss), tf.math.reduce_mean(RE), tf.math.reduce_mean(KL)))
-
         # used_data += len(batch_data)
 
     # We average loss, KL and RE over batch size

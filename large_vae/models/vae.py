@@ -291,7 +291,7 @@ class VAE(Model):
             likelihood_test.append(likelihood_x - np.log(len(losses)))
 
         likelihood_test = np.array(likelihood_test)
-        
+
         return -np.mean(likelihood_test)
 
 

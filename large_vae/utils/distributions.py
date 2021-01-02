@@ -36,7 +36,6 @@ def discretized_log_logistic(x, mean, logscale):
 	x = (tf.floor(x * bins) / bins - mean) / scale
 	cdf_with_x = tf.sigmoid(x + 1. / (bins * scale))
 	cdf_without_x = tf.sigmoid(x)
-	logp =  tf.math.log(cdf_with_x - cdf_without_x + 1e-7)
+	logp =  tf.math.log(tf.math.maximum(cdf_with_x - cdf_without_x, 1e-7))
 	# take sum of logp for different images to get log likelihood of batch of 16 images
 	return tf.reduce_sum(logp, 1)
-
