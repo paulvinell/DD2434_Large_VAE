@@ -1,5 +1,5 @@
 export TIMESTAMP=`date "+%Y%m%d%H%M%S"`
-export STORAGE_NAME="large_vae"
+export STORAGE_NAME="project_large_vae_dd2434"
 export JOB_NAME="large_vae_experiment_$TIMESTAMP"
 export APP_PACKAGE_PATH=./large_vae
 export MAIN_APP_MODULE=main # name of the training file

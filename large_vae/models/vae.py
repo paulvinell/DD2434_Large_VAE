@@ -36,71 +36,72 @@ class VAE(Model):
 
         prod_input_size = np.prod(self.args.input_size)
 
-        # Encoder
-        self.encoder = keras.Sequential([
-            # keras.layers.Flatten(), # Converts (width, height, 1) -> (width*height*1)
-            keras.layers.Dense(
-                300,
-                input_shape=(prod_input_size,),
-                activation='relu',
-                name='EncLayer1'
-            ),
-            keras.layers.Dense(
-                300,
-                input_shape=(300,),
-                activation='relu',
-                name='EncLayer2'
-            ),
-        ])
+        with tf.device('/gpu:0'):
+            # Encoder
+            self.encoder = keras.Sequential([
+                # keras.layers.Flatten(), # Converts (width, height, 1) -> (width*height*1)
+                keras.layers.Dense(
+                    300,
+                    input_shape=(prod_input_size,),
+                    activation='relu',
+                    name='EncLayer1'
+                ),
+                keras.layers.Dense(
+                    300,
+                    input_shape=(300,),
+                    activation='relu',
+                    name='EncLayer2'
+                ),
+            ])
 
-        # Latent variables
-        #mean
-        self.q_mean = keras.layers.Dense(
+            # Latent variables
+            #mean
+            self.q_mean = keras.layers.Dense(
+                        self.args.z1_size,
+                        input_shape=(300,),
+                        name = 'latent_mean'
+                    )
+
+            #variance
+            #? The researchers used an activation function to force the output
+            #? of this layer to be between -6 and 2
+            self.q_logvar = keras.layers.Dense(
                     self.args.z1_size,
                     input_shape=(300,),
-                    name = 'latent_mean'
+                    activation=nn.hardtanh(min_value=-6., max_value=2.).hardtanh_function,
+                    name = 'latent_logvariance'
                 )
 
-        #variance
-        #? The researchers used an activation function to force the output
-        #? of this layer to be between -6 and 2
-        self.q_logvar = keras.layers.Dense(
-                self.args.z1_size,
-                input_shape=(300,),
-                activation=nn.hardtanh(min_value=-6., max_value=2.).hardtanh_function,
-                name = 'latent_logvariance'
+            #Three layered decoder. Input is a sample z, and the decoder returns a (784,) vector.
+            #This process resembles p(x | z) in the graphical representation.
+            self.decoder = keras.Sequential([
+                keras.layers.Dense(
+                    300,
+                    input_shape=(self.args.z1_size, ),
+                    activation='relu',
+                    name='DecLayer1'
+                ),
+                keras.layers.Dense(
+                    300,
+                    input_shape=(300,),
+                    activation='relu',
+                    name='DecLayer2'
+                ),
+            ])
+
+            self.p_mean = keras.layers.Dense(
+                    prod_input_size,
+                    input_shape=(300,),
+                    activation ='sigmoid',
+                    name='dec_output_mean'
             )
 
-        #Three layered decoder. Input is a sample z, and the decoder returns a (784,) vector.
-        #This process resembles p(x | z) in the graphical representation.
-        self.decoder = keras.Sequential([
-            keras.layers.Dense(
-                300,
-                input_shape=(self.args.z1_size, ),
-                activation='relu',
-                name='DecLayer1'
-            ),
-            keras.layers.Dense(
-                300,
-                input_shape=(300,),
-                activation='relu',
-                name='DecLayer2'
-            ),
-        ])
-
-        self.p_mean = keras.layers.Dense(
+            self.p_logvar = keras.layers.Dense(
                 prod_input_size,
                 input_shape=(300,),
-                activation ='sigmoid',
-                name='dec_output_mean'
-        )
-
-        self.p_logvar = keras.layers.Dense(
-            prod_input_size,
-            input_shape=(300,),
-            activation = nn.hardtanh(min_value = -4.5, max_value = 0.0).hardtanh_function,
-            name = 'dec_output_logvar'
-        )
+                activation = nn.hardtanh(min_value = -4.5, max_value = 0.0).hardtanh_function,
+                name = 'dec_output_logvar'
+            )
 
         # weight initialization
         #! Consider changing the weight initialization if necessary
