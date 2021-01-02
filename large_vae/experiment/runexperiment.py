@@ -24,6 +24,7 @@ def run_experiment(model, train_x, val_x, test_x, dir, args):
         of epochs passed as argument in CLI.
 
     """
+
     train_dataset = batch_data(train_x, args)   # tf.data.Dataset.from_tensor_slices(train_x).batch(args.batch_size)
     eval_dataset =  batch_data(val_x, args)     # tf.data.Dataset.from_tensor_slices(val_x).batch(args.batch_size)
     test_dataset =  batch_data(test_x, args)    # tf.data.Dataset.from_tensor_slices(test_x).batch(args.batch_size)
@@ -40,7 +41,7 @@ def run_experiment(model, train_x, val_x, test_x, dir, args):
 
     current_epoch = 0
     best_loss = 1e10
-
+    experiment_begin_time = time.time()
     while (current_epoch < args.epochs):
 
         current_epoch += 1
@@ -59,13 +60,15 @@ def run_experiment(model, train_x, val_x, test_x, dir, args):
             eval_dataset,
         )
 
-        epoch_elapsed_time = time.time() - epoch_start_time
+        epoch_end_time = time.time()
+        epoch_elapsed_time = epoch_end_time - epoch_start_time
+        experiment_elapsed_time = time.time() - experiment_begin_time
 
         # Breaking if the loss increased
         if (eval_loss_epoch <= best_loss):
             best_loss = eval_loss_epoch
-        else:
-            break
+        # else:
+        #     break
 
         # if the loss increased we don't add this epoch to the history
         # update the process history
@@ -77,7 +80,7 @@ def run_experiment(model, train_x, val_x, test_x, dir, args):
         eval_history['RE'].append(eval_RE_epoch)
         eval_history['KL'].append(eval_KL_epoch)
 
-        time_history.append(epoch_elapsed_time)
+        time_history.append(experiment_elapsed_time)
 
         # printing results
         print('Epoch: {}/{}, Time elapsed: {:.2f}s\n'
@@ -99,7 +102,7 @@ def run_experiment(model, train_x, val_x, test_x, dir, args):
     log_likelihood_test, log_likelihood_train, elbo_test, elbo_train = evaluate_model(model, train_x, test_x, dir, args)
 
     # Print the results of the test
-    with open(dir + 'final results.txt') as f:
+    with open(dir + 'final results.txt', 'w') as f:
         print('FINAL EVALUATION ON TEST SET\n'
               'LogL (TEST): {:.2f}\n'
               'LogL (TRAIN): {:.2f}\n'
