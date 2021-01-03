@@ -2,7 +2,7 @@ export TIMESTAMP=`date "+%Y%m%d%H%M%S"`
 export STORAGE_NAME="large_vae"
 export JOB_NAME="large_vae_experiment_$TIMESTAMP"
 export APP_PACKAGE_PATH=./large_vae
-export MAIN_APP_MODULE=main # name of the training file
+export MAIN_APP_MODULE=large_vae.main # name of the training file
 export JOB_DIR="gs://$STORAGE_NAME/jobs/$JOB_NAME"
 
 # The below line submits the job to google cloud.
@@ -14,5 +14,6 @@ gcloud ai-platform jobs submit training $JOB_NAME \
         --job-dir $JOB_DIR \
         --region europe-west1 \
         --config gcloud/config.yaml \
-        -- example-flag-1 666 \
-        -- example-flag-2 "value"
+        -- \
+        --example-flag-1 666 \
+        --example-flag-2 "value"

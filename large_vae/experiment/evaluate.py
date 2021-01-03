@@ -1,7 +1,7 @@
 import time
 
-from experiment.train import one_pass
-from utils.visual import plot_images
+from large_vae.experiment.train import one_pass
+from large_vae.utils.visual import plot_images
 
 
 def evaluate_model(model, train_dataset, test_dataset, dir, args):
@@ -10,7 +10,7 @@ def evaluate_model(model, train_dataset, test_dataset, dir, args):
     """
 
     # We are going to test model on the first batch of the test dataset
-    
+
 
     # Plot images
     # No need to plot all the images of the dataset, we gonna plot just one batch
@@ -21,7 +21,7 @@ def evaluate_model(model, train_dataset, test_dataset, dir, args):
     plot_images(args, first_batch_test, dir, 'real test dataset')
 
     reconstructed_dataset = model.reconstruct_x(first_batch_test).numpy()
-    # Plotting the reconstructed dataset 
+    # Plotting the reconstructed dataset
     plot_images(args, reconstructed_dataset, dir, 'reconstructed test dataset')
 
     # Generating an image

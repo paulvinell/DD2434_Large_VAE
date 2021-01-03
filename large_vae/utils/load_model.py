@@ -2,7 +2,7 @@ import os
 import json
 import errno
 
-from models.vae import VAE
+from large_vae.models.vae import VAE
 
 def load_model(args):
 
@@ -14,11 +14,11 @@ def load_model(args):
 
 
 def create_experiment_folder(args, cwf):
-    """ Creates the folder where to save the results of the experiment  
-        The name of the folder is generated automatically from the 
+    """ Creates the folder where to save the results of the experiment
+        The name of the folder is generated automatically from the
         parameters of the experiment (args).
 
-        It also saves the experiment parameters as a json file in the 
+        It also saves the experiment parameters as a json file in the
         resulting folder.
 
     """
@@ -37,14 +37,14 @@ def create_experiment_folder(args, cwf):
         str(dict_args).replace('\'', '').replace('{', '').replace('}', '').replace(': ', '-'),
         ""
     )
-    
-    # Creating the folder 
+
+    # Creating the folder
     if not os.path.exists(expe_folder_abs_path):
         try:
             os.makedirs(expe_folder_abs_path)
         except OSError as e:
             if e.errno != errno.EEXIST:
-                raise 
+                raise
 
     # Save the json file containing the parameters in the folder
     param_path = os.path.join(expe_folder_abs_path, 'parameters.json')

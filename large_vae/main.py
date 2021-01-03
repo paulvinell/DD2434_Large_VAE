@@ -1,11 +1,20 @@
 #
-# Notes:
+### Notes:
 # Created using Tensorflow 2.4.0
 #
-from utils.parse_arg import parse_arguments
-from utils.load_data import load_experiment_dataset
-from utils.load_model import load_model, create_experiment_folder
-from experiment.runexperiment import run_experiment
+#### How do I run this?
+# 1. Navigate to subdirectory: your/path/to/DD2434_Large_VAE
+# 2. Run: $ python -m large_vae.main
+#
+#### Why can't we just it like we did previously?
+# Google cloud ML engine wants the structure of the
+# project to be like a proper, installable, python program.
+#
+
+from large_vae.utils.parse_arg import parse_arguments
+from large_vae.utils.load_data import load_experiment_dataset
+from large_vae.utils.load_model import load_model, create_experiment_folder
+from large_vae.experiment.runexperiment import run_experiment
 
 def main():
     # Parse arguments
@@ -16,7 +25,7 @@ def main():
 
     # Initialize the model
     vae = load_model(args)
-    
+
     # Directory where to save the results of this experiment
     experiment_folder = create_experiment_folder(args, __file__)
 

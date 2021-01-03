@@ -11,9 +11,9 @@ import tensorflow as tf
 import numpy as np
 import math
 
-from utils import nn
-from utils.distributions import discretized_log_logistic, log_normal
-from models.model import Model
+from large_vae.utils import nn
+from large_vae.utils.distributions import discretized_log_logistic, log_normal
+from large_vae.models.model import Model
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 #			AUTOENCODER

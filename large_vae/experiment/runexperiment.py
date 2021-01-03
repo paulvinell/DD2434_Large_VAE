@@ -2,10 +2,10 @@ import time
 
 import tensorflow as tf
 
-from experiment.train import one_pass
-from experiment.evaluate import evaluate_model
-from utils.visual import plot_history
-from utils.load_data import batch_data
+from large_vae.experiment.train import one_pass
+from large_vae.experiment.evaluate import evaluate_model
+from large_vae.utils.visual import plot_history
+from large_vae.utils.load_data import batch_data
 
 def optimizer(lr):
     # Optimizer
@@ -120,4 +120,3 @@ def run_experiment(model, train_x, val_x, test_x, dir, args):
             test_KL
         ), file=f)
         f.close()
-
