@@ -15,5 +15,6 @@ gcloud ai-platform jobs submit training $JOB_NAME \
         --region europe-west1 \
         --config gcloud/config.yaml \
         -- \
-        --example-flag-1 666 \
-        --example-flag-2 "value"
+        --dataset "mnist" \
+        --model "vae" \
+        --prior "gaussian"

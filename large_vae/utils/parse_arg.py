@@ -1,4 +1,7 @@
 import argparse
+import os
+
+from large_vae.utils.load_model import create_experiment_folder
 
 ######### All possible arguments #########
 #+- Training +-#
@@ -93,8 +96,11 @@ def parse_arguments():
 
     parser.add_argument("--z1_size", type=pos_num, default=40, help = "first latent layer size")
     parser.add_argument("--z2_size", type=pos_num, default=40, help = "second latent layer size")
-    parser.add_argument("--dataset", type=str, default='mnist', choices=['mninst', 'frey'], help = "dataset name")
+    parser.add_argument("--dataset", type=str, default='mnist', choices=['mnist', 'frey'], help = "dataset name")
     parser.add_argument("--pseudoinput_count", type=int, default=500, help='number of pseudoinputs for the VampPrior')
+
+    #+- Extra +-#
+    parser.add_argument("--job-dir", type=str, default=None, help="which directory to save in")
 
     args = parser.parse_args()
 
@@ -103,5 +109,23 @@ def parse_arguments():
         args_vars['input_size'] = (28, 28, 1)
     elif args.dataset == 'frey':
         args_vars['input_size'] = (20, 28, 1)
+
+    # Gcloud and job directory stuff
+    args_vars['gcloud'] = False
+    if args.job_dir is None:
+        # The absolute path to the current folder (*/.../large_vae/utils)
+        cur_folder = os.path.dirname(__file__)
+        # The path to the root folder (*/.../large_vae/utils/../)
+        main_folder = cur_folder + '/../'
+        # The path to the root folder simplified (*/.../large_vae)
+        main_folder_clean = os.path.normpath(main_folder)
+        # Directory where to save the results of this experiment
+        args_vars['job_dir'] = create_experiment_folder(args, main_folder_clean)
+
+    if args.job_dir.startswith('gs://'):
+        args_vars['gcloud'] = True
+
+    if not args.job_dir.endswith('/'):
+        args_vars['job_dir'] += '/'
 
     return args

@@ -13,7 +13,7 @@
 
 from large_vae.utils.parse_arg import parse_arguments
 from large_vae.utils.load_data import load_experiment_dataset
-from large_vae.utils.load_model import load_model, create_experiment_folder
+from large_vae.utils.load_model import load_model
 from large_vae.experiment.runexperiment import run_experiment
 
 def main():
@@ -26,11 +26,8 @@ def main():
     # Initialize the model
     vae = load_model(args)
 
-    # Directory where to save the results of this experiment
-    experiment_folder = create_experiment_folder(args, __file__)
-
     # Run the experiment
-    run_experiment(vae, train_dataset, eval_dataset, test_dataset, experiment_folder, args)
+    run_experiment(vae, train_dataset, eval_dataset, test_dataset, args)
 
 
 if __name__ == "__main__":

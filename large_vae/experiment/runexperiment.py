@@ -13,7 +13,7 @@ def optimizer(lr):
 
     return optimizer
 
-def run_experiment(model, train_x, val_x, test_x, dir, args):
+def run_experiment(model, train_x, val_x, test_x, args):
 
     """ Run the complete experiment.
         That is, for each epoch, train the dataset and
@@ -99,7 +99,7 @@ def run_experiment(model, train_x, val_x, test_x, dir, args):
     # At this point we have the best model
     # We test it now on the test dataset
     test_loss, test_KL, test_RE = one_pass(model, test_dataset)
-    log_likelihood_test, log_likelihood_train, elbo_test, elbo_train = evaluate_model(model, train_x, test_x, dir, args)
+    log_likelihood_test, log_likelihood_train, elbo_test, elbo_train = evaluate_model(model, train_x, test_x, args)
 
     # Print the results of the test
     with open(dir + 'final results.txt', 'w') as f:

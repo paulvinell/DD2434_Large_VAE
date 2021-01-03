@@ -13,7 +13,7 @@ def load_model(args):
     return model
 
 
-def create_experiment_folder(args, cwf):
+def create_experiment_folder(args, project_folder):
     """ Creates the folder where to save the results of the experiment
         The name of the folder is generated automatically from the
         parameters of the experiment (args).
@@ -23,11 +23,16 @@ def create_experiment_folder(args, cwf):
 
     """
 
-    # The absolute path to the project folder (*/.../large_vae/)
-    project_folder = os.path.dirname(cwf)
-
     # Generating the folder absolute path
     dict_args = vars(args).copy()
+
+    # Don't include unnecessary identifiers
+    dict_args.pop('input_size')
+    dict_args.pop('job_dir')
+    dict_args.pop('gcloud')
+    if dict_args.get('model') == 'vae':
+        dict_args.pop('z2_size')
+
     expe_folder_abs_path = os.path.join(
         project_folder,
         "results",
