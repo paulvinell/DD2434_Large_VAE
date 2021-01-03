@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 
@@ -11,6 +12,18 @@ class Model(keras.Model):
     def add_pseudoinputs(self):
         """ To add pseudoinputs to the Vamprior model
         """
+        nonlinearity = nn.hardtanh(min_value=0., max_value=1.).hardtanh_function
+        self.means = keras.layers.Dense(self.args.number_components, input_shape=np.prod(self.args.input_size), activation='sigmoid') # we shouldn't use bias here
+
+        #initialize pseudoinputs
+        if self.args.use_training_data_init: # the so-called "vampprior data"
+            pass
+        else:
+            pass
+
+        # create an idle input for calling pseudo-inputs
+        self.idle_input = None
+
         return
 
     ##

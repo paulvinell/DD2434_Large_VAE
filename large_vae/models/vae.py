@@ -108,7 +108,7 @@ class VAE(Model):
 
         #TODO: add pseudoinputs if Vamprior is used
         if self.args.prior == 'vampprior':
-            pass
+            self.add_pseudoinputs()
 
 
     def q(self, x):
@@ -176,9 +176,22 @@ class VAE(Model):
             # print("----------------> res: ", res)
             return res
         elif self.args.prior == 'vampprior':
-            # TODO: stuff
-            q_mean, q_sigma = self.q(z)
-            # TODO: other stuff
+            components = self.args.number_of_components
+
+            X = self.means(self.idle_input) # defined in model.py
+            z_p_mean, z_p_logvar = self.q(X) # dimensions: components x M
+
+            z_expand = tf.expand_dims(z,1) # expand input
+            means = tf.expand_dims(z_p_mean,0)
+            logvars = tf.expand_dims(z_p_logvar,0)
+
+            a = log_normal(z, means, logvars, dim=2) - math.log(components) # p_lambda, dimensions: batch size x components
+            a_max = tf.math.reduce_max(a, axis=1) # dimensions: batch size x 1
+
+            log_p_z = a_max + tf.log(tf.reduce_sum(tf.exp(a - tf.expand_dims(a_max,1)),1)) # dimensions: batch size x 1
+
+            return log_p_z
+
         else:
             pass
 
@@ -348,8 +361,9 @@ class VAE(Model):
             ))
 
         elif self.args.prior == 'vampprior':
-            #TODO: When we will implement VampPrior
-            pass
+            means = tf.slice(self.means(self.idle_input), [0],[N]) # check this, also self.means and self.idle_input are defined in model.py
+            z_sample_gen_mu, z_sample_gen_logvar = self.q(means)
+            z_sample_rand = self.repTrick(z_sample_gen_mu, z_sample_gen_logvar)
 
         sample_rand = self.p(z_sample_rand)
 
