@@ -1,13 +1,19 @@
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import numpy as np
 from tensorflow.python.lib.io import file_io
 
-def plot_images(args, x_sample, file_name, size_x=4, size_y=4):
+from utils.data_saving import save_data
+
+def plot_images(x_sample, file_name, args, size_x=4, size_y=4):
 
     fig = plt.figure(figsize=(size_x, size_y))
 
     gs = gridspec.GridSpec(size_x, size_y)
     gs.update(wspace=0.05, hspace=0.05)
+
+    #Save the data in a file before plotting it
+    save_data(x_sample, file_name, args.job_dir)
 
     for i, sample in enumerate(x_sample):
         ax = plt.subplot(gs[i])
@@ -33,6 +39,9 @@ def plot(args, data, time, train_or_eval, type):
         train_or_eval,
         type
     )
+    #Save the data in a file before plotting it
+    save_data(np.array(data), fig_name, args.job_dir)
+
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.set_xlabel('time')
@@ -41,15 +50,18 @@ def plot(args, data, time, train_or_eval, type):
     plt.plot(time, data)
     plt_save(args, fig_name + '.png')
 
-# TODO: Plot the history
-def plot_history(train_history, eval_history, time_history, dir):
+def plot_history(train_history, eval_history, time_history, args):
+    
+    #Save time history in a file
+    save_data(time_history, 'time', args.job_dir)
 
     # Plotting train history
     for metric_name, metric_data in train_history.items():
-        plot(metric_data, time_history, 'train', metric_name, dir)
+        plot(args, metric_data, time_history, 'train', metric_name)
 
     for metric_name, metric_data in eval_history.items():
-        plot(metric_data, time_history, 'evaluation', metric_name, dir)
+        plot(args, metric_data, time_history, 'evaluation', metric_name)
+
 
 # Do you think this is a terribly complicated way to save a plot?
 # It is.

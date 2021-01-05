@@ -389,3 +389,6 @@ class VAE(Model):
         """
         x_mean, _, _, _, _ = self.forwardPass(x)
         return x_mean
+
+    def call(self, inputs, training, mask):
+        return self.forwardPass(inputs)
