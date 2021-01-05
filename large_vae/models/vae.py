@@ -4,7 +4,6 @@
 #	Authors: David, Majd, Paul, Fredrick
 #
 
-from scipy.special import logsumexp
 import tensorflow.keras as keras
 import tensorflow.nn as nn
 import tensorflow as tf
@@ -14,6 +13,7 @@ import math
 from large_vae.utils import nn
 from large_vae.utils.distributions import discretized_log_logistic, log_normal
 from large_vae.models.model import Model
+from scipy.special import logsumexp
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 #			AUTOENCODER
@@ -106,7 +106,7 @@ class VAE(Model):
         # weight initialization
         #! Consider changing the weight initialization if necessary
 
-        #TODO: add pseudoinputs if Vamprior is used
+        # add pseudoinputs if Vamprior is used
         if self.args.prior == 'vampprior':
             self.add_pseudoinputs()
 
@@ -175,20 +175,27 @@ class VAE(Model):
             res = tf.math.reduce_sum(res)
             # print("----------------> res: ", res)
             return res
+
+        # In this part we only evaluate the VampPrior given the current pseudoinputs; we do not learn the pseudoinputs
         elif self.args.prior == 'vampprior':
-            components = self.args.number_of_components
+            pseudoinputs = self.args.pseudoinput_count
 
-            X = self.means(self.idle_input) # defined in model.py
-            z_p_mean, z_p_logvar = self.q(X) # dimensions: components x M
+            # The idle input is used to evaluate the pseudoinputs
+            # The idle input has input size (pseudoinput_count) and output size (the image dimensions, e.g. 784)
+            U = self.means(self.idle_input) # defined in model.py
 
-            z_expand = tf.expand_dims(z,1) # expand input
+            # Here we use the learned variational distribution q to infer the posterior that is our vampprior
+            z_p_mean, z_p_logvar = self.q(U) # dimensions: pseudoinputs x M
+
+            # Expand the argument to this function and the inferred 
+            z_expand = tf.expand_dims(z,1)
             means = tf.expand_dims(z_p_mean,0)
             logvars = tf.expand_dims(z_p_logvar,0)
 
-            a = log_normal(z, means, logvars, dim=2) - math.log(components) # p_lambda, dimensions: batch size x components
-            a_max = tf.math.reduce_max(a, axis=1) # dimensions: batch size x 1
+            density = log_normal(z, means, logvars, dim=2) - math.log(pseudoinputs) # p_lambda, dimensions: batch size x pseudoinputs
+            density_max = tf.math.reduce_max(density, axis=1) # dimensions: batch size x 1
 
-            log_p_z = a_max + tf.log(tf.reduce_sum(tf.exp(a - tf.expand_dims(a_max,1)),1)) # dimensions: batch size x 1
+            log_p_z = density_max + tf.log(tf.reduce_sum(tf.exp(density - tf.expand_dims(density_max,1)),1)) # dimensions: batch size x 1
 
             return log_p_z
 
@@ -361,9 +368,9 @@ class VAE(Model):
             ))
 
         elif self.args.prior == 'vampprior':
-            means = tf.slice(self.means(self.idle_input), [0],[N]) # check this, also self.means and self.idle_input are defined in model.py
-            z_sample_gen_mu, z_sample_gen_logvar = self.q(means)
-            z_sample_rand = self.repTrick(z_sample_gen_mu, z_sample_gen_logvar)
+            means = tf.slice(self.means(self.idle_input), [0],[N]) # check this, self.means and self.idle_input are defined in model.py
+            z_sample_gen_mean, z_sample_gen_logvar = self.q(means)
+            z_sample_rand = self.repTrick(z_sample_gen_mean, z_sample_gen_logvar)
 
         sample_rand = self.p(z_sample_rand)
 

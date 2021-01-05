@@ -32,6 +32,9 @@ from large_vae.utils.load_model import create_experiment_folder
 # pseudoinputs:
 #   - number of pseudoinputs of the vampprior
 #   - possible values = positive number
+# use_training_data_init:
+#   - whether to initialize pseudoinputs with training data
+#   - possible values = True, False
 # z1_size:
 #   - First latent layer size
 #   - possible values = positive number
@@ -97,7 +100,10 @@ def parse_arguments():
     parser.add_argument("--z1_size", type=pos_num, default=40, help = "first latent layer size")
     parser.add_argument("--z2_size", type=pos_num, default=40, help = "second latent layer size")
     parser.add_argument("--dataset", type=str, default='mnist', choices=['mnist', 'frey'], help = "dataset name")
-    parser.add_argument("--pseudoinput_count", type=int, default=500, help='number of pseudoinputs for the VampPrior')
+    parser.add_argument("--pseudoinput_count", type=int, default=560, help='number of pseudoinputs for the VampPrior')
+    parser.add_argument("--use_training_data_init", type=bool, default=False, help='whether to use training data to initialize the VampPrior')
+    parser.add_argument("--pseudoinputs_mean", type=float, default=0., help='mean for the pseudoinputs')
+    parser.add_argument("--pseudoinputs_std", type=float, default=1., help='stddev for the pseudoinputs')
 
     #+- Extra +-#
     parser.add_argument("--job-dir", type=str, default=None, help="which directory to save in")
