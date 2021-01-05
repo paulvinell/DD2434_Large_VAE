@@ -1,11 +1,14 @@
 import time
+import numpy as np
 
+from tensorflow.python.lib.io import file_io
 import tensorflow as tf
 
 from large_vae.experiment.train import one_pass
 from large_vae.experiment.evaluate import evaluate_model
 from large_vae.utils.visual import plot_history
 from large_vae.utils.load_data import batch_data
+
 
 def optimizer(lr):
     # Optimizer
@@ -92,7 +95,7 @@ def run_experiment(model, train_x, val_x, test_x, args):
             eval_loss_epoch, eval_RE_epoch, eval_KL_epoch,
         ))
 
-    plot_history(train_history, eval_history, time_history, dir)
+    plot_history(train_history, eval_history, time_history, args)
 
 
     # Out the while loop
@@ -101,8 +104,12 @@ def run_experiment(model, train_x, val_x, test_x, args):
     test_loss, test_KL, test_RE = one_pass(model, test_dataset)
     log_likelihood_test, log_likelihood_train, elbo_test, elbo_train = evaluate_model(model, train_x, test_x, args)
 
+    # Saving the model
+    # model.build((args.batch_size, np.prod(args.input_size)))
+    # model.save(args.job_dir+"final_model")
+
     # Print the results of the test
-    with open(dir + 'final results.txt', 'w') as f:
+    with file_io.FileIO(args.job_dir + 'final results.txt', 'w') as f:
         print('FINAL EVALUATION ON TEST SET\n'
               'LogL (TEST): {:.2f}\n'
               'LogL (TRAIN): {:.2f}\n'

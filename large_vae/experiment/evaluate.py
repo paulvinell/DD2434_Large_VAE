@@ -4,7 +4,7 @@ from large_vae.experiment.train import one_pass
 from large_vae.utils.visual import plot_images
 
 
-def evaluate_model(model, train_dataset, test_dataset, dir, args):
+def evaluate_model(model, train_dataset, test_dataset, args):
     """ Evaluate the best model on the evaluation dataset.
         Plot some metrics and generate images.
     """
@@ -18,15 +18,15 @@ def evaluate_model(model, train_dataset, test_dataset, dir, args):
     first_batch_test = test_dataset[0:args.batch_size]
 
     # Plotting the real test dataset.
-    plot_images(args, first_batch_test, dir, 'real test dataset')
+    plot_images(first_batch_test, 'real test dataset', args)
 
     reconstructed_dataset = model.reconstruct_x(first_batch_test).numpy()
     # Plotting the reconstructed dataset
-    plot_images(args, reconstructed_dataset, dir, 'reconstructed test dataset')
+    plot_images(reconstructed_dataset,'reconstructed test dataset', args)
 
     # Generating an image
     generated_data = model.generate_x()[0].numpy()
-    plot_images(args, generated_data, dir, 'generated dataset')
+    plot_images(generated_data, 'generated dataset', args)
 
 
     # CALCULATE lower-bound

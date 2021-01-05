@@ -106,7 +106,7 @@ class VAE(Model):
         # weight initialization
         #! Consider changing the weight initialization if necessary
 
-        #TODO: add pseudoinputs if Vamprior is used
+        #TODO: add pseudoinputs if Vampprior is used
         if self.args.prior == 'vampprior':
             self.add_pseudoinputs()
 
@@ -382,3 +382,6 @@ class VAE(Model):
         """
         x_mean, _, _, _, _ = self.forwardPass(x)
         return x_mean
+
+    def call(self, inputs, training, mask):
+        return self.forwardPass(inputs)
