@@ -97,6 +97,7 @@ def run_experiment(model, train_x, val_x, test_x, args):
 
     plot_history(train_history, eval_history, time_history, args)
 
+    model.save_weights(args.job_dir + "model_weights.save")
 
     # Out the while loop
     # At this point we have the best model
@@ -104,12 +105,8 @@ def run_experiment(model, train_x, val_x, test_x, args):
     test_loss, test_KL, test_RE = one_pass(model, test_dataset)
     log_likelihood_test, log_likelihood_train, elbo_test, elbo_train = evaluate_model(model, train_x, test_x, args)
 
-    # Saving the model
-    # model.build((args.batch_size, np.prod(args.input_size)))
-    # model.save(args.job_dir+"final_model")
-
-    # Print the results of the test
-    with file_io.FileIO(args.job_dir + 'final results.txt', 'w') as f:
+    Print the results of the test
+    with file_io.FileIO(args.job_dir + 'final_results.txt', 'w') as f:
         print('FINAL EVALUATION ON TEST SET\n'
               'LogL (TEST): {:.2f}\n'
               'LogL (TRAIN): {:.2f}\n'
@@ -126,4 +123,3 @@ def run_experiment(model, train_x, val_x, test_x, args):
             test_RE,
             test_KL
         ), file=f)
-        f.close()

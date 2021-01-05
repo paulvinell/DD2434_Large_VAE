@@ -3,7 +3,7 @@ import matplotlib.gridspec as gridspec
 import numpy as np
 from tensorflow.python.lib.io import file_io
 
-from utils.data_saving import save_data
+from large_vae.utils.data_saving import save_data
 
 def plot_images(x_sample, file_name, args, size_x=4, size_y=4):
 
@@ -51,7 +51,7 @@ def plot(args, data, time, train_or_eval, type):
     plt_save(args, fig_name + '.png')
 
 def plot_history(train_history, eval_history, time_history, args):
-    
+
     #Save time history in a file
     save_data(time_history, 'time', args.job_dir)
 
