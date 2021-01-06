@@ -105,7 +105,7 @@ def run_experiment(model, train_x, val_x, test_x, args):
     test_loss, test_KL, test_RE = one_pass(model, test_dataset)
     log_likelihood_test, log_likelihood_train, elbo_test, elbo_train = evaluate_model(model, train_x, test_x, args)
 
-    Print the results of the test
+    # Print the results of the test
     with file_io.FileIO(args.job_dir + 'final_results.txt', 'w') as f:
         print('FINAL EVALUATION ON TEST SET\n'
               'LogL (TEST): {:.2f}\n'
