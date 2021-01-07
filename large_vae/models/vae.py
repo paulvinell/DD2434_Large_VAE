@@ -187,7 +187,7 @@ class VAE(Model):
             # Here we use the learned variational distribution q to infer the posterior that is our vampprior
             z_p_mean, z_p_logvar = self.q(U) # dimensions: pseudoinputs x M
 
-            # Expand the argument to this function and the inferred 
+            # Expand the argument to this function and the inferred
             z_expand = tf.expand_dims(z,1)
             means = tf.expand_dims(z_p_mean,0)
             logvars = tf.expand_dims(z_p_logvar,0)
@@ -265,7 +265,7 @@ class VAE(Model):
             return loss, RE, KL
 
 
-    def loglikelihood(self, x, sample_size=5000, batch_size=100):
+    def loglikelihood(self, x, sample_size=64, batch_size=32):
         """
         # ##
         # ##    Estimate the marginal log likelihood
@@ -341,9 +341,9 @@ class VAE(Model):
 
             loss, RE, KL = self.loss(x, average=True)
 
-            LB += loss.cpu().numpy()
-            RE_tot += RE.cpu().numpy()
-            KL_tot += KL.cpu().numpy()
+            LB += tf.identity(loss).numpy()
+            RE_tot += tf.identity(RE).numpy()
+            KL_tot += tf.identity(KL).numpy()
 
         return LB/I
 
