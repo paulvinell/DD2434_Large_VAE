@@ -48,7 +48,7 @@ def run_experiment(model, train_x, val_x, test_x, args):
     while (current_epoch < args.epochs):
 
         current_epoch += 1
-        print("----- EPOCH {}/{} -----".format(current_epoch,args.epochs))
+        tf.print("----- EPOCH {}/{} -----".format(current_epoch,args.epochs))
 
         epoch_start_time = time.time()
         train_loss_epoch, train_RE_epoch, train_KL_epoch = one_pass(
@@ -86,7 +86,7 @@ def run_experiment(model, train_x, val_x, test_x, args):
         time_history.append(experiment_elapsed_time)
 
         # printing results
-        print('Epoch: {}/{}, Time elapsed: {:.2f}s\n'
+        tf.print('Epoch: {}/{}, Time elapsed: {:.2f}s\n'
                 '* Train loss: {:.2f}   (RE: {:.2f}, KL: {:.2f})\n'
                 'o Val.  loss: {:.2f}   (RE: {:.2f}, KL: {:.2f})\n'
                 '\n'.format(
