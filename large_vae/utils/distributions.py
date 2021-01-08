@@ -13,6 +13,7 @@ maxEps = 1.-1e-5
 ##
 ##	Gaussian function in logarithmic scale
 ##
+@tf.function
 def log_normal(x, mean, log_variance, average=False, dim=None):
 	log_N = -0.5 * (log_variance + tf.pow((x - mean), 2) / tf.exp(log_variance))
 
@@ -25,6 +26,7 @@ def log_normal(x, mean, log_variance, average=False, dim=None):
 ## Calculates the log probability of x according
 ## to a discretized log logistic distribution
 ##
+@tf.function
 def discretized_log_logistic(x, mean, logscale):
 	bins = 256.
 	scale = tf.exp(logscale)

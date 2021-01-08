@@ -58,6 +58,7 @@ class VAE(Model):
         self.q_mean = keras.layers.Dense(
                     self.args.z1_size,
                     input_shape=(300,),
+                    activation=nn.hardtanh(min_value=-6., max_value=2.).hardtanh_function,
                     name = 'latent_mean'
                 )
 
@@ -386,5 +387,6 @@ class VAE(Model):
         x_mean, _, _, _, _ = self.forwardPass(x)
         return x_mean
 
+    @tf.function
     def call(self, inputs, training, mask):
         return self.forwardPass(inputs)
