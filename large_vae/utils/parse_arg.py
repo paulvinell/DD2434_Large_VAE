@@ -98,7 +98,6 @@ def parse_arguments():
     parser.add_argument("--prior", type=str, default='gaussian', choices=['gaussian', 'vampprior', 'mog'], help = "prior to use")
 
     parser.add_argument("--z1_size", type=pos_num, default=40, help = "first latent layer size")
-    parser.add_argument("--z2_size", type=pos_num, default=40, help = "second latent layer size")
     parser.add_argument("--dataset", type=str, default='mnist', choices=['mnist', 'frey'], help = "dataset name")
     parser.add_argument("--pseudoinput_count", type=int, default=560, help='number of pseudoinputs for the VampPrior')
     parser.add_argument("--use_training_data_init", type=bool, default=False, help='whether to use training data to initialize the VampPrior')

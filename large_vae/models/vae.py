@@ -36,72 +36,71 @@ class VAE(Model):
 
         prod_input_size = np.prod(self.args.input_size)
 
-        with tf.device('/gpu:0'):
-            # Encoder
-            self.encoder = keras.Sequential([
-                # keras.layers.Flatten(), # Converts (width, height, 1) -> (width*height*1)
-                keras.layers.Dense(
-                    300,
-                    input_shape=(prod_input_size,),
-                    activation='relu',
-                    name='EncLayer1'
-                ),
-                keras.layers.Dense(
-                    300,
-                    input_shape=(300,),
-                    activation='relu',
-                    name='EncLayer2'
-                ),
-            ])
+        # Encoder
+        self.encoder = keras.Sequential([
+            # keras.layers.Flatten(), # Converts (width, height, 1) -> (width*height*1)
+            keras.layers.Dense(
+                300,
+                input_shape=(prod_input_size,),
+                activation='relu',
+                name='EncLayer1'
+            ),
+            keras.layers.Dense(
+                300,
+                input_shape=(300,),
+                activation='relu',
+                name='EncLayer2'
+            ),
+        ])
 
-            # Latent variables
-            #mean
-            self.q_mean = keras.layers.Dense(
-                        self.args.z1_size,
-                        input_shape=(300,),
-                        name = 'latent_mean'
-                    )
-
-            #variance
-            #? The researchers used an activation function to force the output
-            #? of this layer to be between -6 and 2
-            self.q_logvar = keras.layers.Dense(
+        # Latent variables
+        #mean
+        self.q_mean = keras.layers.Dense(
                     self.args.z1_size,
                     input_shape=(300,),
-                    activation=nn.hardtanh(min_value=-6., max_value=2.).hardtanh_function,
-                    name = 'latent_logvariance'
+                    name = 'latent_mean'
                 )
 
-            #Three layered decoder. Input is a sample z, and the decoder returns a (784,) vector.
-            #This process resembles p(x | z) in the graphical representation.
-            self.decoder = keras.Sequential([
-                keras.layers.Dense(
-                    300,
-                    input_shape=(self.args.z1_size, ),
-                    activation='relu',
-                    name='DecLayer1'
-                ),
-                keras.layers.Dense(
-                    300,
-                    input_shape=(300,),
-                    activation='relu',
-                    name='DecLayer2'
-                ),
-            ])
-
-            self.p_mean = keras.layers.Dense(
-                    prod_input_size,
-                    input_shape=(300,),
-                    activation ='sigmoid',
-                    name='dec_output_mean'
+        #variance
+        #? The researchers used an activation function to force the output
+        #? of this layer to be between -6 and 2
+        self.q_logvar = keras.layers.Dense(
+                self.args.z1_size,
+                input_shape=(300,),
+                activation=nn.hardtanh(min_value=-6., max_value=2.).hardtanh_function,
+                name = 'latent_logvariance'
             )
 
-            self.p_logvar = keras.layers.Dense(
+        #Three layered decoder. Input is a sample z, and the decoder returns a (784,) vector.
+        #This process resembles p(x | z) in the graphical representation.
+        self.decoder = keras.Sequential([
+            keras.layers.Dense(
+                300,
+                input_shape=(self.args.z1_size, ),
+                activation='relu',
+                name='DecLayer1'
+            ),
+            keras.layers.Dense(
+                300,
+                input_shape=(300,),
+                activation='relu',
+                name='DecLayer2'
+            ),
+        ])
+
+        self.p_mean = keras.layers.Dense(
                 prod_input_size,
                 input_shape=(300,),
-                activation = nn.hardtanh(min_value = -4.5, max_value = 0.0).hardtanh_function,
-                name = 'dec_output_logvar'
-            )
+                activation ='sigmoid',
+                name='dec_output_mean'
+        )
+
+        self.p_logvar = keras.layers.Dense(
+            prod_input_size,
+            input_shape=(300,),
+            activation = nn.hardtanh(min_value = -4.5, max_value = 0.0).hardtanh_function,
+            name = 'dec_output_logvar'
+        )
 
         # weight initialization
         #! Consider changing the weight initialization if necessary
@@ -110,7 +109,7 @@ class VAE(Model):
         if self.args.prior == 'vampprior':
             self.add_pseudoinputs()
 
-
+    @tf.function
     def q(self, x):
         """
         ##
@@ -133,7 +132,7 @@ class VAE(Model):
         return q_mean, q_logvar
 
 
-
+    @tf.function
     def p(self, z):
         """
         ##	Generative posterior
@@ -157,6 +156,7 @@ class VAE(Model):
         return x_mean, x_logvar
 
 
+    @tf.function
     def prior(self, z):
         """
         # ##
@@ -202,7 +202,7 @@ class VAE(Model):
         else:
             pass
 
-
+    @tf.function
     def forwardPass(self, x):
         """
         # ##
@@ -226,7 +226,7 @@ class VAE(Model):
 
         return x_mean, x_logvar, z, z_mean, z_logvar
 
-
+    @tf.function
     def loss(self, x, beta=1., average=False):
         """
         # ##
@@ -265,7 +265,7 @@ class VAE(Model):
             return loss, RE, KL
 
 
-    def loglikelihood(self, x, sample_size=64, batch_size=32):
+    def loglikelihood(self, x, sample_size=1, batch_size=32):
         """
         # ##
         # ##    Estimate the marginal log likelihood
@@ -314,7 +314,6 @@ class VAE(Model):
 
         return -np.mean(likelihood_test)
 
-
     def lowerBound(self, X, MB = 100):
         """
         # ##
@@ -347,10 +346,7 @@ class VAE(Model):
 
         return LB/I
 
-
-    #? This function is used by the authors in the evaluation module but
-    #? I don't understand why for now.
-    #? I code it just in case we need it
+    @tf.function
     def generate_x(self, N=16):
         """
         # ##
@@ -363,9 +359,9 @@ class VAE(Model):
         # ##
         """
         if self.args.prior == 'gaussian':
-            z_sample_rand = tf.Variable(tf.random.normal(
+            z_sample_rand = tf.random.normal(
                 [N, self.args.z1_size]
-            ))
+            )
 
         elif self.args.prior == 'vampprior':
             means = tf.slice(self.means(self.idle_input), [0],[N]) # check this, self.means and self.idle_input are defined in model.py
@@ -376,7 +372,7 @@ class VAE(Model):
 
         return sample_rand
 
-
+    @tf.function
     def reconstruct_x(self,x):
         """
         # ##

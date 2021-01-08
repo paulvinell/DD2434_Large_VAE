@@ -106,7 +106,7 @@ def run_experiment(model, train_x, val_x, test_x, args):
     # We test it now on the test dataset
     tf.print("Calculating test loss")
     test_loss, test_KL, test_RE = one_pass(model, test_dataset)
-    
+
     tf.print("Calling evaluate_model()")
     log_likelihood_test, log_likelihood_train, elbo_test, elbo_train = evaluate_model(model, train_x, test_x, args)
 

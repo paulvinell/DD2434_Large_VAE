@@ -30,8 +30,6 @@ def create_experiment_folder(args, project_folder):
     dict_args.pop('input_size')
     dict_args.pop('job_dir')
     dict_args.pop('gcloud')
-    if dict_args.get('model') == 'vae':
-        dict_args.pop('z2_size')
 
     expe_folder_abs_path = os.path.join(
         project_folder,
