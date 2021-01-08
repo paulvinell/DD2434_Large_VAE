@@ -34,6 +34,7 @@ class Model(keras.Model):
     ##			logvar
     ##
     ## Return:	reparameterization
+    @tf.function
     def repTrick(self, mu, logvar):
         """ Reparameterization trick
         """
@@ -44,4 +45,4 @@ class Model(keras.Model):
         return res
 
     def call(self, inputs, training, mask):
-        return 
+        return

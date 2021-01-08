@@ -40,14 +40,14 @@ class VAE(Model):
         self.encoder = keras.Sequential([
             # keras.layers.Flatten(), # Converts (width, height, 1) -> (width*height*1)
             keras.layers.Dense(
-                300,
+                args.max_layer_size,
                 input_shape=(prod_input_size,),
                 activation='relu',
                 name='EncLayer1'
             ),
             keras.layers.Dense(
-                300,
-                input_shape=(300,),
+                args.max_layer_size,
+                input_shape=(args.max_layer_size,),
                 activation='relu',
                 name='EncLayer2'
             ),
@@ -57,7 +57,7 @@ class VAE(Model):
         #mean
         self.q_mean = keras.layers.Dense(
                     self.args.z1_size,
-                    input_shape=(300,),
+                    input_shape=(args.max_layer_size,),
                     activation=nn.hardtanh(min_value=-6., max_value=2.).hardtanh_function,
                     name = 'latent_mean'
                 )
@@ -67,7 +67,7 @@ class VAE(Model):
         #? of this layer to be between -6 and 2
         self.q_logvar = keras.layers.Dense(
                 self.args.z1_size,
-                input_shape=(300,),
+                input_shape=(args.max_layer_size,),
                 activation=nn.hardtanh(min_value=-6., max_value=2.).hardtanh_function,
                 name = 'latent_logvariance'
             )
@@ -76,14 +76,14 @@ class VAE(Model):
         #This process resembles p(x | z) in the graphical representation.
         self.decoder = keras.Sequential([
             keras.layers.Dense(
-                300,
+                args.max_layer_size,
                 input_shape=(self.args.z1_size, ),
                 activation='relu',
                 name='DecLayer1'
             ),
             keras.layers.Dense(
-                300,
-                input_shape=(300,),
+                args.max_layer_size,
+                input_shape=(args.max_layer_size,),
                 activation='relu',
                 name='DecLayer2'
             ),
@@ -91,14 +91,14 @@ class VAE(Model):
 
         self.p_mean = keras.layers.Dense(
                 prod_input_size,
-                input_shape=(300,),
+                input_shape=(args.max_layer_size,),
                 activation ='sigmoid',
                 name='dec_output_mean'
         )
 
         self.p_logvar = keras.layers.Dense(
             prod_input_size,
-            input_shape=(300,),
+            input_shape=(args.max_layer_size,),
             activation = nn.hardtanh(min_value = -4.5, max_value = 0.0).hardtanh_function,
             name = 'dec_output_logvar'
         )

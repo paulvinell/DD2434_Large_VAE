@@ -1,5 +1,6 @@
 import tensorflow as tf
 from tensorflow import keras
+import time
 
 @tf.function
 def train_step(model, optimizer, x):
@@ -25,8 +26,9 @@ def one_pass(model, dataset, mode = 'evaluate', optimizer = None):
     loss = 0
     KL = 0
 
-    # used_data = 0
-    # total_data = len(dataset)
+    used_data = 0
+    total_data = len(dataset)
+    batch_time = time.time()
 
     for batch_data in dataset:
         if mode == 'train':
@@ -38,7 +40,10 @@ def one_pass(model, dataset, mode = 'evaluate', optimizer = None):
         loss += loss_stamp
         KL += KL_stamp
 
-        # used_data += len(batch_data)
+        used_data += len(batch_data)
+
+        tf.print("Processed {}/{} (batch took {}s)".format(used_data, batch_data.shape[0] * total_data, time.time() - batch_time))
+        batch_time = time.time()
 
     # We average loss, KL and RE over batch size
     RE /= len(dataset)
