@@ -42,7 +42,7 @@ def one_pass(model, dataset, mode = 'evaluate', optimizer = None):
 
         used_data += len(batch_data)
 
-        tf.print("Processed {}/{} (batch took {}s)".format(used_data, batch_data.shape[0] * total_data, time.time() - batch_time))
+        # tf.print("Processed {}/{} (batch took {}s)".format(used_data, batch_data.shape[0] * total_data, time.time() - batch_time))
         batch_time = time.time()
 
     # We average loss, KL and RE over batch size
