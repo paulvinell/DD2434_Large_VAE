@@ -15,15 +15,14 @@ def evaluate_model(model, train_dataset, test_dataset, args):
 
 
     # Plot images
-    # No need to plot all the images of the dataset, we gonna plot just one batch
+    # No need to plot all the images of the dataset, we gonna plot just 16 images
     # (i.e. args.batch_size images)
     tf.print("Plotting images")
-    first_batch_test = test_dataset[0:args.batch_size]
-
-    # Plotting the real test dataset.
+    first_batch_test = test_dataset[0:16]
     plot_images(first_batch_test, 'real test dataset', args)
 
     tf.print("Plotting images (reconstructed)")
+    # Reconstructing the same 16 images from the test dataset
     reconstructed_dataset = model.reconstruct_x(first_batch_test).numpy()
     # Plotting the reconstructed dataset
     plot_images(reconstructed_dataset,'reconstructed test dataset', args)
