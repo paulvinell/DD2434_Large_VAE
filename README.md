@@ -13,10 +13,10 @@ pip install -r requirements.txt
 
 ## Testing
 
-To test the VAE-model. Nagivate to ./large_vae in the terminal and run,
+To test the VAE-model. Nagivate to the root directory in the terminal and run,
 
 ```bash
-python main.py
+python -m large_vae.main
 ```
 
 ## References
