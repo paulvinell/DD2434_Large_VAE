@@ -39,8 +39,8 @@ def run_experiment(model, train_x, val_x, test_x, args):
     train_history = {'loss':[], 'RE':[], 'KL':[]}
     eval_history = {'loss':[], 'RE':[], 'KL':[]}
 
-    # Time history
-    time_history = list()
+    # epoch history
+    epoch_history = list()
 
     current_epoch = 0#= early_stopping_counter = 0
     best_loss = 1e10
@@ -65,13 +65,12 @@ def run_experiment(model, train_x, val_x, test_x, args):
             eval_dataset,
         )
 
-        epoch_end_time = time.time()
-        epoch_elapsed_time = epoch_end_time - epoch_start_time
-        experiment_elapsed_time = time.time() - experiment_begin_time
-
+        epoch_elapsed_time = time.time() - epoch_start_time
+        
         # Breaking if the loss increased
         if (eval_loss_epoch <= best_loss):
             best_loss = eval_loss_epoch 
+
             # it is passed by reference so best_model is still model and every change in model will be repecuted in model
             # best_model = model  
             # early_stopping_counter = 0
@@ -91,7 +90,8 @@ def run_experiment(model, train_x, val_x, test_x, args):
         eval_history['RE'].append(eval_RE_epoch)
         eval_history['KL'].append(eval_KL_epoch)
 
-        time_history.append(experiment_elapsed_time)
+        # time_history.append(experiment_elapsed_time)
+        epoch_history.append(current_epoch)
 
         # printing results
         tf.print('Epoch: {}/{}, Time elapsed: {:.2f}s\n'
@@ -106,8 +106,10 @@ def run_experiment(model, train_x, val_x, test_x, args):
     # if (best_model):
     #     model = best_model
 
+    training_time = time.time() - experiment_begin_time
+
     tf.print("Plotting history")
-    plot_history(train_history, eval_history, time_history, args)
+    plot_history(train_history, eval_history, epoch_history, args)
 
     tf.print("Saving weights")
     model.save_weights(args.job_dir + "model_weights.save")
@@ -121,9 +123,13 @@ def run_experiment(model, train_x, val_x, test_x, args):
     tf.print("Calling evaluate_model()")
     log_likelihood_test, log_likelihood_train, elbo_test, elbo_train = evaluate_model(model, train_x, test_x, args)
 
+    experiment_elapsed_time = time.time() - experiment_begin_time
+
     # Print the results of the test
     with file_io.FileIO(args.job_dir + 'final_results.txt', 'w') as f:
         print('FINAL EVALUATION ON TEST SET\n'
+            'Total Experiment Time: {:.2f}s\n'
+            'Training Time : {:.2f}s\n'
               'LogL (TEST): {:.2f}\n'
               'LogL (TRAIN): {:.2f}\n'
               'ELBO (TEST): {:.2f}\n'
@@ -131,6 +137,8 @@ def run_experiment(model, train_x, val_x, test_x, args):
               'Loss: {:.2f}\n'
               'RE: {:.2f}\n'
               'KL: {:.2f}'.format(
+            experiment_elapsed_time,
+            training_time,
             log_likelihood_test,
             log_likelihood_train,
             elbo_test,

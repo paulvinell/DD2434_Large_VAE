@@ -44,7 +44,7 @@ def plot(args, data, time, train_or_eval, type):
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.set_xlabel('time')
+    ax.set_xlabel('epochs')
     ax.set_ylabel(type)
     ax.set_title(fig_name)
     plt.plot(time, data)
