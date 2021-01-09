@@ -86,7 +86,7 @@ def parse_arguments():
     below_one = interval(maxi = 1).check
 
     #+- Training +-#
-    parser.add_argument("--epochs", type=pos_num,default=100, help="number of epochs to use during the training")
+    parser.add_argument("--epochs", type=pos_num,default=165, help="number of epochs to use during the training")
     parser.add_argument("--batch_size", type=pos_num,default=128, help="batch size to use for training")
     parser.add_argument("--lr", type=float, default=0.0005,help="learning rate of the learning process" )
     parser.add_argument("--evaluation", type=float, default=0.1,help="percentage of training data to be used for evaluation" )
