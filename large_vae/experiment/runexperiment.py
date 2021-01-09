@@ -42,9 +42,11 @@ def run_experiment(model, train_x, val_x, test_x, args):
     # Time history
     time_history = list()
 
-    current_epoch = 0
+    current_epoch = 0#= early_stopping_counter = 0
     best_loss = 1e10
+    # best_model = None
     experiment_begin_time = time.time()
+
     while (current_epoch < args.epochs):
 
         current_epoch += 1
@@ -69,11 +71,17 @@ def run_experiment(model, train_x, val_x, test_x, args):
 
         # Breaking if the loss increased
         if (eval_loss_epoch <= best_loss):
-            best_loss = eval_loss_epoch
+            best_loss = eval_loss_epoch 
+            # it is passed by reference so best_model is still model and every change in model will be repecuted in model
+            # best_model = model  
+            # early_stopping_counter = 0
         # else:
-        #     break
+        #     if early_stopping_counter >= args.early_stopping:
+        #         if current_epoch >=args.warmup:
+        #             break
+        #     else:
+        #         early_stopping_counter += 1
 
-        # if the loss increased we don't add this epoch to the history
         # update the process history
         train_history['loss'].append(train_loss_epoch)
         train_history['RE'].append(train_RE_epoch)
@@ -94,6 +102,9 @@ def run_experiment(model, train_x, val_x, test_x, args):
             train_loss_epoch, train_RE_epoch, train_KL_epoch,
             eval_loss_epoch, eval_RE_epoch, eval_KL_epoch,
         ))
+
+    # if (best_model):
+    #     model = best_model
 
     tf.print("Plotting history")
     plot_history(train_history, eval_history, time_history, args)
