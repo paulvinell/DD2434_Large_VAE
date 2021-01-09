@@ -85,10 +85,10 @@ class VAE(Model):
             means = tf.expand_dims(z_p_mean,0)
             logvars = tf.expand_dims(z_p_logvar,0)
 
-            density = log_normal(z, means, logvars, dim=2) - math.log(pseudoinputs) # p_lambda, dimensions: batch size x pseudoinputs
+            density = log_normal(z_expand, means, logvars, dim=2) - tf.math.log(tf.dtypes.cast(pseudoinputs, tf.float32)) # p_lambda, dimensions: batch size x pseudoinputs
             density_max = tf.math.reduce_max(density, axis=1) # dimensions: batch size x 1
 
-            log_p_z = density_max + tf.log(tf.reduce_sum(tf.exp(density - tf.expand_dims(density_max,1)),1)) # dimensions: batch size x 1
+            log_p_z = density_max + tf.math.log(tf.reduce_sum(tf.exp(density - tf.expand_dims(density_max,1)),1)) # dimensions: batch size x 1
 
             return log_p_z
 
@@ -254,7 +254,8 @@ class VAE(Model):
             )
 
         elif self.args.prior == 'vampprior':
-            means = tf.slice(self.means(self.idle_input), [0],[N]) # check this, self.means and self.idle_input are defined in model.py
+            means = self.means(self.idle_input)
+            means = tf.slice(means, [0,0],[(N if N < self.args.pseudoinput_count else self.args.pseudoinput_count), np.prod(self.args.input_size)]) # check this, self.means and self.idle_input are defined in model.py
             z_sample_gen_mean, z_sample_gen_logvar, z = self.q(means)
             z_sample_rand = self.repTrick(z_sample_gen_mean, z_sample_gen_logvar)
 
