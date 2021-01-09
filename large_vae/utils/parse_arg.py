@@ -90,8 +90,6 @@ def parse_arguments():
     parser.add_argument("--batch_size", type=pos_num,default=128, help="batch size to use for training")
     parser.add_argument("--lr", type=float, default=0.0005,help="learning rate of the learning process" )
     parser.add_argument("--evaluation", type=float, default=0.1,help="percentage of training data to be used for evaluation" )
-    parser.add_argument("--early_stopping", type=pos_num,default=50, help="number of epochs for early stopping")
-    parser.add_argument("--warmup", type=pos_num,default=100, help="number of epochs for warmup")
 
     #+- Model +-#
     parser.add_argument("--model", type=str, default='vae', choices=['vae', 'hvae'], help="type of model to use")
