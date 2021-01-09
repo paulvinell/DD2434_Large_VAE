@@ -155,7 +155,7 @@ class VAE(Model):
             return loss, RE, KL
 
 
-    def loglikelihood(self, x, sample_size=1, batch_size=32):
+    def loglikelihood(self, x, sample_size=1, batch_size=16):
         """
         # ##
         # ##    Estimate the marginal log likelihood
@@ -176,8 +176,9 @@ class VAE(Model):
             rounds = sample_size / batch_size
             sample_size = batch_size
 
-        for i in range(test_size):
-            x_data_point = tf.expand_dims(x[0],0) # wrap single row in brackets
+        for i in range(test_size): # For each image in the dataset
+            print("{}/{}".format(i, test_size))
+            x_data_point = tf.expand_dims(x[0], 0) # Get the image
 
             losses = []
             for r in range(0, int(rounds)):
@@ -256,10 +257,9 @@ class VAE(Model):
         elif self.args.prior == 'vampprior':
             means = self.means(self.idle_input)
             means = tf.slice(means, [0,0],[(N if N < self.args.pseudoinput_count else self.args.pseudoinput_count), np.prod(self.args.input_size)]) # check this, self.means and self.idle_input are defined in model.py
-            z_sample_gen_mean, z_sample_gen_logvar, z = self.q(means)
-            z_sample_rand = self.repTrick(z_sample_gen_mean, z_sample_gen_logvar)
+            _, _, z_sample_rand = self.encoder(means)
 
-        sample_rand = self.p(z_sample_rand)
+        sample_rand = self.decoder(z_sample_rand)
 
         return sample_rand
 
