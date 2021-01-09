@@ -13,6 +13,7 @@ import math
 from large_vae.utils import nn
 from large_vae.utils.distributions import discretized_log_logistic, log_normal
 from large_vae.models.model import Model
+from large_vae.models.sampling import Sampling
 from scipy.special import logsumexp
 
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -34,74 +35,12 @@ class VAE(Model):
     def __init__(self, args):
         super(VAE, self).__init__(args)
 
-        prod_input_size = np.prod(self.args.input_size)
-
         # Encoder
-        self.encoder = keras.Sequential([
-            # keras.layers.Flatten(), # Converts (width, height, 1) -> (width*height*1)
-            keras.layers.Dense(
-                args.max_layer_size,
-                input_shape=(prod_input_size,),
-                activation='relu',
-                name='EncLayer1'
-            ),
-            keras.layers.Dense(
-                args.max_layer_size,
-                input_shape=(args.max_layer_size,),
-                activation='relu',
-                name='EncLayer2'
-            ),
-        ])
-
-        # Latent variables
-        #mean
-        self.q_mean = keras.layers.Dense(
-                    self.args.z1_size,
-                    input_shape=(args.max_layer_size,),
-                    activation=nn.hardtanh(min_value=-6., max_value=2.).hardtanh_function,
-                    name = 'latent_mean'
-                )
-
-        #variance
-        #? The researchers used an activation function to force the output
-        #? of this layer to be between -6 and 2
-        self.q_logvar = keras.layers.Dense(
-                self.args.z1_size,
-                input_shape=(args.max_layer_size,),
-                activation=nn.hardtanh(min_value=-6., max_value=2.).hardtanh_function,
-                name = 'latent_logvariance'
-            )
+        self.encoder = self.init_encoder(args)
 
         #Three layered decoder. Input is a sample z, and the decoder returns a (784,) vector.
         #This process resembles p(x | z) in the graphical representation.
-        self.decoder = keras.Sequential([
-            keras.layers.Dense(
-                args.max_layer_size,
-                input_shape=(self.args.z1_size, ),
-                activation='relu',
-                name='DecLayer1'
-            ),
-            keras.layers.Dense(
-                args.max_layer_size,
-                input_shape=(args.max_layer_size,),
-                activation='relu',
-                name='DecLayer2'
-            ),
-        ])
-
-        self.p_mean = keras.layers.Dense(
-                prod_input_size,
-                input_shape=(args.max_layer_size,),
-                activation ='sigmoid',
-                name='dec_output_mean'
-        )
-
-        self.p_logvar = keras.layers.Dense(
-            prod_input_size,
-            input_shape=(args.max_layer_size,),
-            activation = nn.hardtanh(min_value = -4.5, max_value = 0.0).hardtanh_function,
-            name = 'dec_output_logvar'
-        )
+        self.decoder = self.init_decoder(args)
 
         # weight initialization
         #! Consider changing the weight initialization if necessary
@@ -109,53 +48,6 @@ class VAE(Model):
         # add pseudoinputs if Vamprior is used
         if self.args.prior == 'vampprior':
             self.add_pseudoinputs()
-
-    @tf.function
-    def q(self, x):
-        """
-        ##
-        ##	Variational posterior
-        ##
-        ##
-        ##	Input:		x			data point
-        ##
-        ##	Retruns 	q_z_mean	mean
-        ##				q_z_var		variance
-        ##
-        """
-
-        x = self.encoder(x)
-        q_mean = self.q_mean(x)
-        # print("############ printing x: ", x)
-        # print("############ tf.shape(x): ", tf.shape(x))
-        q_logvar = self.q_logvar(x)
-
-        return q_mean, q_logvar
-
-
-    @tf.function
-    def p(self, z):
-        """
-        ##	Generative posterior
-        ##
-        ##
-        ##	Input:		z			sample point
-        ##
-        ##	Retruns 	x_mean		mean, which could be interpreted
-        ##							as the reconstructed image.
-        ##				x_var		variance.
-        """
-
-        z = self.decoder(z)
-        x_mean = self.p_mean(z)
-
-        #? For non bimary data, the authors force the data to be between  0.+1./512.
-        #? and 1.-1./512.
-        x_mean = nn.hardtanh(min_value = 0.+1./512, max_value = 1.-1./512.).hardtanh_function(x_mean)
-        x_logvar = self.p_logvar(z)
-
-        return x_mean, x_logvar
-
 
     @tf.function
     def prior(self, z):
@@ -186,7 +78,7 @@ class VAE(Model):
             U = self.means(self.idle_input) # defined in model.py
 
             # Here we use the learned variational distribution q to infer the posterior that is our vampprior
-            z_p_mean, z_p_logvar = self.q(U) # dimensions: pseudoinputs x M
+            z_p_mean, z_p_logvar, z = self.q(U) # dimensions: pseudoinputs x M
 
             # Expand the argument to this function and the inferred
             z_expand = tf.expand_dims(z,1)
@@ -218,12 +110,9 @@ class VAE(Model):
         # ##                z_logvar     Variance of encoded data points.
         # ##
         """
-        z_mean, z_logvar = self.q(x)
-        # print('----------> z_mean:', z_mean)
-        # print('----------> z_logvar:', z_logvar)
-        z = self.repTrick(z_mean, z_logvar)
+        z_mean, z_logvar, z = self.encoder(x)
         # print('----------> z:', z)
-        x_mean, x_logvar = self.p(z)
+        x_mean, x_logvar = self.decoder(z)
 
         return x_mean, x_logvar, z, z_mean, z_logvar
 
@@ -366,7 +255,7 @@ class VAE(Model):
 
         elif self.args.prior == 'vampprior':
             means = tf.slice(self.means(self.idle_input), [0],[N]) # check this, self.means and self.idle_input are defined in model.py
-            z_sample_gen_mean, z_sample_gen_logvar = self.q(means)
+            z_sample_gen_mean, z_sample_gen_logvar, z = self.q(means)
             z_sample_rand = self.repTrick(z_sample_gen_mean, z_sample_gen_logvar)
 
         sample_rand = self.p(z_sample_rand)
@@ -390,3 +279,36 @@ class VAE(Model):
     @tf.function
     def call(self, inputs, training, mask):
         return self.forwardPass(inputs)
+
+    def init_encoder(self, args):
+        prod_input_size = np.prod(self.args.input_size)
+
+        encoder_inputs = keras.Input(shape=(prod_input_size,))
+        x = keras.layers.Dense(args.max_layer_size, activation='relu', name='EncLayer1')(encoder_inputs)
+        x = keras.layers.Dense(args.max_layer_size, activation='relu', name='EncLayer2')(x)
+        x = keras.layers.Flatten()(x)
+        q_mean = keras.layers.Dense(self.args.z1_size, activation=nn.hardtanh(-6., 2.), name = 'latent_mean')(x)
+        q_logvar = keras.layers.Dense(self.args.z1_size, activation=nn.hardtanh(-6., 2.), name = 'latent_logvariance')(x)
+
+        z = Sampling()([q_mean, q_logvar])
+
+        encoder = keras.Model(encoder_inputs, [q_mean, q_logvar, z], name="encoder")
+
+        return encoder
+
+    def init_decoder(self, args):
+        prod_input_size = np.prod(self.args.input_size)
+
+        decoder_inputs = keras.Input(shape=(args.z1_size,))
+        x = keras.layers.Dense(args.max_layer_size, activation='relu', name='EncLayer1')(decoder_inputs)
+        x = keras.layers.Dense(args.max_layer_size, activation='relu', name='EncLayer2')(x)
+        x = keras.layers.Flatten()(x)
+
+        p_mean = keras.layers.Dense(prod_input_size, activation='sigmoid', name = 'dec_output_mean')(x)
+        p_mean = keras.layers.Activation(nn.hardtanh(0.+1./512,1.-1./512.))(p_mean)
+
+        p_logvar = keras.layers.Dense(prod_input_size, activation=nn.hardtanh(-4.5, 0.0), name = 'dec_output_logvar')(x)
+
+        decoder = keras.Model(decoder_inputs, [p_mean, p_logvar], name="decoder")
+
+        return decoder

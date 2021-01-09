@@ -27,22 +27,5 @@ class Model(keras.Model):
         # create an idle input for calling pseudoinputs
         self.idle_input = tf.Variable(tf.eye(self.args.pseudoinput_count, self.args.pseudoinput_count), trainable=False)
 
-    ##
-    ##	Reparameterization trick.
-    ##
-    ## Inputs:	mu
-    ##			logvar
-    ##
-    ## Return:	reparameterization
-    @tf.function
-    def repTrick(self, mu, logvar):
-        """ Reparameterization trick
-        """
-        eps = tf.random.normal(tf.shape(mu), mean=0, stddev=1)
-        # Note: e^(logvar * 0.5) = sqrt(variance) = standard deviation
-        res = mu + tf.exp(logvar * 0.5) * eps
-
-        return res
-
     def call(self, inputs, training, mask):
         return
