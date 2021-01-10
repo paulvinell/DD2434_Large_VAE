@@ -79,7 +79,7 @@ class VAE(Model):
             U = self.means(self.idle_input) # defined in model.py
 
             # Here we use the learned variational distribution q to infer the posterior that is our vampprior
-            z_p_mean, z_p_logvar, z = self.q(U) # dimensions: pseudoinputs x M
+            z_p_mean, z_p_logvar, _ = self.encoder(U) # dimensions: pseudoinputs x M
 
             # Expand the argument to this function and the inferred
             z_expand = tf.expand_dims(z,1)
