@@ -99,8 +99,8 @@ def parse_arguments():
     parser.add_argument("--max_layer_size", type=pos_num, default=300, help = "max number of neurons in a layer")
     parser.add_argument("--dataset", type=str, default='mnist', choices=['mnist', 'frey'], help = "dataset name")
     parser.add_argument("--pseudoinput_count", type=int, default=560, help='number of pseudoinputs for the VampPrior')
-    parser.add_argument("--pseudoinputs_mean", type=float, default=0., help='mean for the pseudoinputs')
-    parser.add_argument("--pseudoinputs_std", type=float, default=1., help='stddev for the pseudoinputs')
+    parser.add_argument("--pseudoinputs_mean", type=float, default=-0.05, help='mean for the pseudoinputs')
+    parser.add_argument("--pseudoinputs_std", type=float, default=0.01, help='stddev for the pseudoinputs')
     parser.add_argument("--use_training_data_init", type=bool, default=False, help='whether to use training data to initialize the VampPrior')
 
     #+- Extra +-#
