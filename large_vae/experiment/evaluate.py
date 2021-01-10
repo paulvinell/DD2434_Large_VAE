@@ -49,12 +49,12 @@ def evaluate_model(model, train_dataset, test_dataset, args):
     tf.print("Calculating log-likelihood")
 
     t_ll_s = time.time()
-    log_likelihood_test = 0 #model.loglikelihood(test_dataset)
+    log_likelihood_test = model.loglikelihood(test_dataset)
     t_ll_e = time.time()
     print('Test log_likelihood value {:.2f} in time: {:.2f}s'.format(log_likelihood_test, t_ll_e - t_ll_s))
 
     t_ll_s = time.time()
-    log_likelihood_train = 0 #model.loglikelihood(train_dataset)
+    log_likelihood_train = model.loglikelihood(train_dataset)
     t_ll_e = time.time()
     print('Train log_likelihood value {:.2f} in time: {:.2f}s'.format(log_likelihood_train, t_ll_e - t_ll_s))
 

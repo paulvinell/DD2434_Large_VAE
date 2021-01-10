@@ -9,6 +9,7 @@ import tensorflow.nn as nn
 import tensorflow as tf
 import numpy as np
 import math
+import time
 
 from large_vae.utils import nn
 from large_vae.utils.distributions import discretized_log_logistic, log_normal
@@ -155,55 +156,49 @@ class VAE(Model):
             return loss, RE, KL
 
 
-    def loglikelihood(self, x, sample_size=1, batch_size=16):
+    def loglikelihood(self, x, sample_size=128):
         """
         # ##
         # ##    Estimate the marginal log likelihood
         # ##
         # ##    Inputs:     sample_size: the number of sample points for importance sampling
-        # ##                batch_size: the size of the batch for calculating the loss
+        # ##                x: the dataset
         # ##
         # ##    Returns:    loglikelihood
         # ##
         """
         test_size = x.shape[0] # get number of rows in test data
+        likelihood_test = np.zeros((test_size,))
 
-        likelihood_test = []
-
-        if sample_size <= batch_size:
-            rounds = 1
-        else:
-            rounds = sample_size / batch_size
-            sample_size = batch_size
+        progress_update = time.time()
 
         for i in range(test_size): # For each image in the dataset
-            print("{}/{}".format(i, test_size))
-            x_data_point = tf.expand_dims(x[0], 0) # Get the image
+            x_data_point = tf.expand_dims(x[i], 0) # Get the image
 
-            losses = []
-            for r in range(0, int(rounds)):
-                # Copy data point to get # of rows == sample_size
-                tf.broadcast_to(x_data_point, [sample_size, x_data_point.shape[1]])
+            # Copy data point to get # of rows == sample_size
+            x_copies = tf.broadcast_to(x_data_point, [sample_size, x_data_point.shape[1]])
 
-                loss_for_data_point, _, _ = self.loss(x) # self.loss should not average before returning
+            losses, _, _ = self.loss(x_copies) # self.loss should not average before returning
 
-                losses.append(-loss_for_data_point)
+            ### Calculates the log of the average loss
+            # losses = [log(loss_1), log(loss_2), ..., log(loss_n)]
+            #
+            # likelihood_x = log[exp(log(loss_1)) + exp(log(loss_2)) + ... + exp(log(loss_n))]
+            #              = log[loss_1 + loss_2 + ... + loss_n]
+            #              = log[n * avg_loss]
+            #              = log[n] + log[avg_loss]
+            #
+            # likelihood_test[i] = likelihood_x - log(n)
+            #                    = log[avg_loss]
 
-            # Calculate max
-            losses = np.asarray(losses)
-            #  Reshape into the form
-            #  array([[1],
-            #   [2],
-            #   [3],
-            #   ...,
-            #   [sample_size]])
-            losses = np.reshape(losses, (losses.shape[0] * losses.shape[1], 1))
             likelihood_x = logsumexp(losses)
-            likelihood_test.append(likelihood_x - np.log(len(losses)))
+            likelihood_test[i] = likelihood_x - np.log(sample_size)
 
-        likelihood_test = np.array(likelihood_test)
+            if time.time() - progress_update >= 10:
+                print("Progress update: processed {}/{} ({:.3g}%)".format(i+1, test_size, 100*(i+1)/test_size))
+                progress_update = time.time()
 
-        return -np.mean(likelihood_test)
+        return np.mean(likelihood_test)
 
     def lowerBound(self, X, MB = 100):
         """
