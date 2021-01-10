@@ -93,7 +93,7 @@ def parse_arguments():
 
     #+- Model +-#
     parser.add_argument("--model", type=str, default='vae', choices=['vae', 'hvae'], help="type of model to use")
-    parser.add_argument("--prior", type=str, default='gaussian', choices=['gaussian', 'vampprior', 'mog'], help = "prior to use")
+    parser.add_argument("--prior", type=str, default='gaussian', choices=['gaussian', 'vampprior'], help = "prior to use")
 
     parser.add_argument("--z1_size", type=pos_num, default=40, help = "first latent layer size")
     parser.add_argument("--max_layer_size", type=pos_num, default=300, help = "max number of neurons in a layer")
@@ -105,6 +105,7 @@ def parse_arguments():
 
     #+- Extra +-#
     parser.add_argument("--job-dir", type=str, default=None, help="which directory to save in")
+    parser.add_argument("--no_ll", type=bool, default=False, help="skip estimating log-likelihood")
 
     args = parser.parse_args()
 
