@@ -26,6 +26,11 @@ def main():
     # Initialize the model
     vae = load_model(args)
 
+    ### Open comments to train with smaller set in MNIST. 
+    #size = 5000
+    #print(tf.shape(test_x))
+    #train_smaller = tf.slice(train_dataset, [0, 0], [size, 784])
+
     # Run the experiment
     run_experiment(vae, train_dataset, eval_dataset, test_dataset, args)
 
