@@ -31,6 +31,8 @@ from scipy.special import logsumexp
 #
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+#test
+
 class VAE(Model):
 
     def __init__(self, args):
